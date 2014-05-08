@@ -1,12 +1,19 @@
 PoolFS
 ======
 
-An experimental MacFUSE filesystem featuring pooled storage and per-directory redundancy
+Fork of https://github.com/mungler/PoolFS
 
-UNFINISHED CODE!!!
+PoolFS is a file system extension for OSXFUSE http://osxfuse.github.io
+Similar solutions exists e.g. UnionFS, AuFS, mhddfs or "mount -o union". But none have the capability of easily display a merged folder structure from any folders on any drive and still function as any other folder.
 
-I really wanted a simple, pooled storage mechanism to run on OS X.  I made some progress working on top of MacFUSE - in terms of read-only the pooling mostly worked.  
+This fork might wander off in another direction than the original idea.
+The main focus of this fork will be on virtually merging folder structures from several locations and drives, and use it without more effort than it would be on a regular folder. Recurrency is not supported at the moment.
 
-Work to support writing to the pool was underway when the project stalled.  The uncertainty of the future of FUSE on Mac contributed to the project fizzling out.
+* Location for new files are guessed where to be put based on latest queries. Maybe we could add a UI asking for which location to put new files?
+* Moving or renaming a file or folder will be done in the same node.
+* Copying a file or folder are guessed as in creating files.
+* Files that are found on several locations are marked with a "Duplicate" tag in Finder. (Only Mavericks)
 
-Feel free to fork and carry on :)
+
+
+
