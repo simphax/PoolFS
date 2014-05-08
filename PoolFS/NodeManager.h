@@ -12,6 +12,7 @@
 @interface NodeManager : NSObject {
 	NSArray * _nodes;
 	NSArray * _redundantPaths;
+    int lastRootNode;
 }
 
 -(id) initWithNodes:(NSArray*)nodes andRedundantPaths:(NSArray*)redundantPaths;

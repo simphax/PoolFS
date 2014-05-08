@@ -30,7 +30,7 @@
 #import <sys/xattr.h>
 #import <sys/stat.h>
 #import "PoolFS_Filesystem.h"
-#import <MacFUSE/MacFUSE.h>
+#import <OSXFUSE/OSXFUSE.h>
 #import "NSError+POSIX.h"
 #import "NodeManager.h"
 
@@ -50,15 +50,16 @@
 
 #pragma mark Moving an Item
 
+//TODO: Won't work with redundant path
 - (BOOL)moveItemAtPath:(NSString *)source 
                 toPath:(NSString *)destination
                  error:(NSError **)error {
 	
 	NSLog(@"moveItemAtPath:%@ toPath:%@ START-----------------------", source, destination);
-	
+    
 	// move the source path to the dest path on the source node (faster I/O)
 	NSArray* sourceNodePaths = [_manager nodePathsForPath:source error:error];
-	
+	/*
 	for (id sourceNodePath in sourceNodePaths) {
 		
 		NSString* node = [_manager nodeForPath:source error:error];
@@ -78,15 +79,15 @@
 			*error = [NSError errorWithPOSIXCode:errno];
 		}
 	}
-	
+	*/
 	// next we check the number of source nodes == number of dest nodes 
-	NSArray* destNodePaths = [_manager nodePathsForPath:destination error:error createNew:YES];
+	NSArray* destNodePaths = [_manager nodePathsForPath:destination error:error createNew:YES forNodePaths:sourceNodePaths];
 
-	int sourceCount = [sourceNodePaths count];
-	int destCount = [destNodePaths count];
+	//int sourceCount = [sourceNodePaths count];
+	//int destCount = [destNodePaths count];
 
-	if (sourceCount != destCount) {
-	
+	//if (sourceCount != destCount) {
+	/*
 		if (sourceCount > destCount) {
 			// we're moving an item from a redundant directory to a non-redundant directory, purge one copy
 			NSLog(@"moving from redundant to non-redundant - not yet implemented!");
@@ -95,14 +96,40 @@
 			NSLog(@"moving from non-redundant to redundant");
 			
 			for (id destNodePath in destNodePaths) {
+                /*
 				if (![sourceNodePaths containsObject:destNodePath]) {
-					[_manager createDirectoriesForNodePath:destNodePath error:error];
+					//[_manager createDirectoriesForNodePath:destNodePath error:error];
 					NSLog(@"copying from %@ to %@",[sourceNodePaths objectAtIndex:0], destNodePath);
 					[[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:destNodePath error:error];
 				}
-			}
-		}
-	}
+                 */
+                //[_manager createDirectoriesForNodePath:destNodePath error:error];
+                NSString *destNodePath  = [destNodePaths objectAtIndex:0];
+                //Lets try to just rename it first.
+                NSString* p_src = [sourceNodePaths objectAtIndex:0];
+                NSString* p_dst = destNodePath;
+                int ret = rename([p_src UTF8String], [p_dst UTF8String]);
+                if ( ret < 0 ) {
+                    //We failed to rename
+                    if ( error ) {
+                        *error = [NSError errorWithPOSIXCode:errno];
+                    }
+                    if(errno == EXDEV) //Cross-device link error. This means the file is at another drive
+                    {
+                        //TODO: This might be dangerous because there is a risk of data loss if it crashes midway. And I guess some metadata may get lost.
+                        [_manager createDirectoriesForNodePath:destNodePath error:error];
+                        NSLog(@"replacing %@ with %@",destNodePath,[sourceNodePaths objectAtIndex:0]);
+                        [[NSFileManager defaultManager] removeItemAtPath:destNodePath error:error];
+                        if(![[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:destNodePath error:error]) return NO;
+                    }
+                    else
+                    {
+                        return NO;
+                    }
+                }
+			//}
+        //}
+	//}
 	
 	NSLog(@"moveItemAtPath:%@ toPath:%@ END-----------------------", source, destination);
 	
@@ -331,23 +358,29 @@
 	
 	NSLog(@"exchangeDataOfItemAtPath:%@ withItemAtPath:%@ ***************************", path1, path2);
 	
-	//
-	//	NSArray* paths1 = [_manager nodePathsForPath:path1 error:error];
-	//	NSArray* paths2 = [_manager nodePathsForPath:path2 error:error];
-	//	
-	//	int i = 0;
-	//	
-	//	(for i = 0; i < [paths1 count]; i++)
-	//	{
-	//		
-	//	}
-	
-	//  int ret = exchangedata([p1 UTF8String], [p2 UTF8String], 0);
-	//  if ( ret < 0 ) {
-	//    *error = [NSError errorWithPOSIXCode:errno];
-	//    return NO;    
-	//  }
-	return YES;  
+    //TODO: This will not work with redundant paths
+	NSString* p1 = [[_manager nodePathsForPath:path1 error:error firstOnly:YES] objectAtIndex:0];
+    NSString* p2 = [[_manager nodePathsForPath:path2 error:error firstOnly:YES] objectAtIndex:0];
+    int ret = exchangedata([p1 UTF8String], [p2 UTF8String], 0);
+    if ( ret < 0 ) {
+        if ( error ) {
+            *error = [NSError errorWithPOSIXCode:errno];
+        }
+        if(errno == EXDEV) //Cross-device link error. This means the file is at another drive
+        {
+            //TODO: This might be dangerous because there is a risk of data loss if it crashes midway. And I guess some metadata may get lost.
+            [_manager createDirectoriesForNodePath:p2 error:error];
+            NSLog(@"re %@ with %@",p2, p1);
+            [[NSFileManager defaultManager] removeItemAtPath:p2 error:error];
+            if(![[NSFileManager defaultManager] copyItemAtPath:p1 toPath:p2 error:error]) return NO;
+
+        }
+        else
+        {
+            return NO;
+        }
+    }
+    return YES;
 }
 
 #pragma mark Directory Contents
@@ -365,7 +398,9 @@
 	}
 	
 	// dedupe the result
-	return [[NSSet setWithArray:arr] allObjects];
+    NSArray *result = [[NSSet setWithArray:arr] allObjects];
+    //NSLog(@"result: %@",result);
+	return result;
 }
 
 #pragma mark Getting and Setting Attributes
@@ -374,21 +409,23 @@
                                 userData:(id)userData
                                    error:(NSError **)error {
 	
-	NSLog(@"attributesOfItemAtPath:%@",path);
-	
-	NSString* p = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
+	//NSLog(@"attributesOfItemAtPath:%@",path);
+	NSArray *allNodes = [_manager nodePathsForPath:path error:error];
+	NSString* p = [allNodes objectAtIndex:0];
+    //NSLog(@"attributesOfItemAtPath Node path: %@",p);
 	NSDictionary* attribs = 
     [[NSFileManager defaultManager] attributesOfItemAtPath:p error:error];
 	//NSLog(@"Attr: %@", attribs);
-	
-	return attribs;
+    
+    return attribs;
 }
 
 - (NSDictionary *)attributesOfFileSystemForPath:(NSString *)path
                                           error:(NSError **)error {
 	
-	NSLog(@"attributesOfFileSystemForPath:%@", path);
+	//NSLog(@"attributesOfFileSystemForPath:%@", path);
 	NSString* p = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
+    //NSLog(@"attributesOfFileSystemForPath Node path: %@",p);
 	NSDictionary* d =
     [[NSFileManager defaultManager] attributesOfFileSystemForPath:p error:error];
 	if (d) {
@@ -404,35 +441,32 @@
          ofItemAtPath:(NSString *)path
              userData:(id)userData
                 error:(NSError **)error {
-	NSLog(@"setAttributes:ofItemAtPath:%@",path);
+	NSLog(@"setAttributes:%@ ofItemAtPath:%@",attributes,path);
 	
-	NSArray* nodePaths = [_manager nodePathsForPath:path error:error];
+	NSString* nodePath = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
 	
-	for (id nodePath in nodePaths) {
-		
 		// TODO: Handle other keys not handled by NSFileManager setAttributes call.
 		
-		NSNumber* offset = [attributes objectForKey:NSFileSize];
-		if ( offset ) {
-			int ret = truncate([nodePath UTF8String], [offset longLongValue]);
-			if ( ret < 0 ) {
-				*error = [NSError errorWithPOSIXCode:errno];
-				//return NO;    
-			}
-		}
-		NSNumber* flags = [attributes objectForKey:kGMUserFileSystemFileFlagsKey];
-		if (flags != nil) {
-			int rc = chflags([nodePath UTF8String], [flags intValue]);
-			if (rc < 0) {
-				*error = [NSError errorWithPOSIXCode:errno];
-				//return NO;
-			}
-		}
-		[[NSFileManager defaultManager] setAttributes:attributes
-										 ofItemAtPath:nodePath
-												error:error];
+    NSNumber* offset = [attributes objectForKey:NSFileSize];
+    if ( offset ) {
+        int ret = truncate([nodePath UTF8String], [offset longLongValue]);
+        if ( ret < 0 ) {
+            *error = [NSError errorWithPOSIXCode:errno];
+            return NO;
+        }
+    }
+    NSNumber* flags = [attributes objectForKey:kGMUserFileSystemFileFlagsKey];
+    if (flags != nil) {
+        int rc = chflags([nodePath UTF8String], [flags intValue]);
+        if (rc < 0) {
+            *error = [NSError errorWithPOSIXCode:errno];
+            return NO;
+        }
+    }
+    [[NSFileManager defaultManager] setAttributes:attributes
+                                     ofItemAtPath:nodePath
+                                            error:error];
 		
-	}
 	
 	return YES; //TODO: handle errors properly
 }
@@ -440,7 +474,7 @@
 #pragma mark Extended Attributes
 
 - (NSArray *)extendedAttributesOfItemAtPath:(NSString *)path error:(NSError **)error {
-	
+    return nil;
 	NSLog(@"extendedAttributesOfItemAtPath:%@",path);
 	
 	NSString* p = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
@@ -463,6 +497,8 @@
 		[contents addObject:s];
 		ptr += ([s length] + 1);
 	}
+    
+    NSLog(@"contents: %@",contents);
 	return contents;
 }
 
@@ -471,25 +507,87 @@
                             position:(off_t)position
                                error:(NSError **)error {  
 	
-	NSLog(@"valueOfExtendedAttribute:ofItemAtPath:%@",path);
-	
-	NSString* p = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
+	//NSLog(@"valueOfExtendedAttribute:%@ ofItemAtPath:%@",name,path);
+    
+	NSMutableData* data = nil;
+    
+    NSArray *allNodes =[_manager nodePathsForPath:path error:error];
+    
+	NSString* p = [allNodes objectAtIndex:0];
 	
 	ssize_t size = getxattr([p UTF8String], [name UTF8String], nil, 0,
 							position, 0);
-	if ( size < 0 ) {
+    
+	if ( size < 0) { //failed to get attrib
 		*error = [NSError errorWithPOSIXCode:errno];
-		return nil;
 	}
-	NSMutableData* data = [NSMutableData dataWithLength:size];
-	size = getxattr([p UTF8String], [name UTF8String], 
-					[data mutableBytes], [data length],
-					position, 0);
-	if ( size < 0 ) {
-		*error = [NSError errorWithPOSIXCode:errno];
-		return nil;
-	}  
-	return data;
+    else
+    {
+        data = [NSMutableData dataWithLength:size];
+        size = getxattr([p UTF8String], [name UTF8String], 
+                        [data mutableBytes], [data length],
+                        position, 0);
+        
+        if ( size < 0 ) {
+            *error = [NSError errorWithPOSIXCode:errno];
+            data = nil;
+        }
+    }
+    
+    NSData *result = data;
+    if([allNodes count] > 1)
+    {
+        //Tells finder the last tag was red
+        if([name isEqualToString:@"com.apple.FinderInfo"])
+        {
+            if(data == nil)
+            {
+                data = [NSMutableData dataWithLength:32];
+            }
+            if(data != nil)
+            {
+                //NSLog(@"FinderInfo %@: %@",path,data);
+                NSRange range = {9, 1};
+                Byte replace = 0x0c;
+                [data replaceBytesInRange:range withBytes:&replace];
+                
+                //NSLog(@"ReplacInfo %@: %@",path,data);
+            }
+        }
+        
+        result = data;
+        
+        //Injects a tag called "Duplicate" into the metadata
+        if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
+        {
+            NSMutableArray *unserializedTags;
+            NSPropertyListFormat format;
+            if(data != nil)
+            {
+                NSString *error2;
+                unserializedTags = [NSPropertyListSerialization propertyListFromData:data
+                                                                    mutabilityOption:NSPropertyListMutableContainers
+                                                                              format:&format
+                                                                    errorDescription:&error2];
+            }
+            else
+            {
+                unserializedTags = [[NSMutableArray alloc] init];
+                format = NSPropertyListBinaryFormat_v1_0;
+            }
+            if(unserializedTags != nil)
+            {
+                NSError **error2;
+                [unserializedTags addObject:@"Duplicate\n6"];
+                //NSLog(@"tags: %@",unserializedTags);
+                
+                result = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:error2];
+            }
+        }
+        
+    }
+
+	return result;
 }
 
 - (BOOL)setExtendedAttribute:(NSString *)name 
@@ -499,8 +597,8 @@
 					 options:(int)options
                        error:(NSError **)error {
 	
-	NSLog(@"setExtendedAttribute:ofItemAtPath:%@",path);
-	
+	NSLog(@"setExtendedAttribute:%@ ofItemAtPath:%@",name,path);
+    
 	// Setting com.apple.FinderInfo happens in the kernel, so security related 
 	// bits are set in the options. We need to explicitly remove them or the call
 	// to setxattr will fail.
@@ -517,7 +615,7 @@
 						   position, options);
 		if ( ret < 0 ) {
 			*error = [NSError errorWithPOSIXCode:errno];
-			//return NO;
+			return NO;
 		}
 	}
 	
@@ -540,7 +638,7 @@
 		ret = removexattr([nodePath UTF8String], [name UTF8String], 0);
 		if ( ret < 0 ) {
 			*error = [NSError errorWithPOSIXCode:errno];
-			//return NO;
+			return NO;
 		}
 	}
 	

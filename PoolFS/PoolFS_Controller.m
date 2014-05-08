@@ -21,7 +21,7 @@
 //
 #import "PoolFS_Controller.h"
 #import "PoolFS_Filesystem.h"
-#import <MacFUSE/MacFUSE.h>
+#import <OSXFUSE/OSXFUSE.h>
 #import "NodeManager.h"
 
 @implementation PoolFS_Controller
@@ -32,7 +32,7 @@
 	NSDictionary* userInfo = [notification userInfo];
 	NSError* error = [userInfo objectForKey:kGMUserFileSystemErrorKey];
 	NSLog(@"kGMUserFileSystem Error: %@, userInfo=%@", error, [error userInfo]);  
-	NSRunAlertPanel(@"Mount Failed", [error localizedDescription], nil, nil, nil);
+	//NSRunAlertPanel(@"Mount Failed", [error localizedDescription], nil, nil, nil);
 	[[NSApplication sharedApplication] terminate:nil];
 }
 
@@ -88,7 +88,7 @@
 	
 	// use this if you dont have the plist already created
 	//[defaults setObject:[NSArray arrayWithObjects:@"/Volumes/slice1", @"/Volumes/slice2", @"/Volumes/slice3", @"/Volumes/slice4", nil] forKey:@"nodes"];
-	//[defaults setObject:[NSArray arrayWithObjects:@"abc/def/redundant", nil] forKey:@"redundant_paths"];
+    //[defaults setObject:[NSArray arrayWithObjects:nil] forKey:@"redundant_paths"];
 	
 	NSArray* nodes = [defaults arrayForKey:@"nodes"];
 	NSArray* redundantPaths = [defaults arrayForKey:@"redundant_paths"];
@@ -114,6 +114,9 @@
 	// would be mounting an HFS+ directory through LoopbackFS, so we do want
 	// this option in that case.
 	[options addObject:@"native_xattr"];
+	//[options addObject:@"local"];
+	[options addObject:@"allow_other"];
+	//[options addObject:@"kernel_cache"];
 	
 	[options addObject:@"volname=PoolFS"];
 	[fs_ mountAtPath:mountPath 

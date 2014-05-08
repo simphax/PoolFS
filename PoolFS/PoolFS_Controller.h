@@ -6,19 +6,19 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 #import <Cocoa/Cocoa.h>
+#import "PoolFS_Filesystem.h"
 
 @class GMUserFileSystem;
 @class PoolFS_Controller;
 
 @interface PoolFS_Controller : NSObject {
   GMUserFileSystem* fs_;
-  PoolFS_Controller* fs_delegate_;
+  PoolFS_Filesystem* fs_delegate_;
 }
 
 - (void)userPreferencesUpdated:(NSNotification*)notification;
 
-NSString* const kPoolFSPreferencesUpdated = @"PoolFSPreferencesUpdated";
-NSString* const observedObject = @"com.mungler.PoolFS.PrefPaneTarget";
-
 @end
 
+NSString* const kPoolFSPreferencesUpdated = @"PoolFSPreferencesUpdated";
+NSString* const observedObject = @"com.mungler.PoolFS.PrefPaneTarget";

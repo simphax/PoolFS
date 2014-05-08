@@ -13,6 +13,7 @@
 @implementation NodeManager
 
 -(id) initWithNodes:(NSArray*)nodes andRedundantPaths:(NSArray*)redundantPaths {
+    lastRootNode = 0;
 	_nodes = [nodes retain];
 	_redundantPaths = [redundantPaths retain];
 	return self;
@@ -53,39 +54,89 @@
 	
 	NSMutableArray* nodePaths = [[NSMutableArray alloc] init];
 	
+    
 	int i;
-	
-	for (i = 0; i < [_nodes count]; i++) {
-		NSString* tempPath = [[[_nodes objectAtIndex:i] stringByAppendingString:path] retain];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:tempPath]) {
-			if (includePaths) {
-				[nodePaths addObject:tempPath];
-			} else {
-				[nodePaths addObject:[_nodes objectAtIndex:i]];
-			}
 
-			if (firstOnly)
-				break;
-		}
-	}
+    /*if(sourceNodePaths != nil && firstOnly)
+    {
+        for (i = 0; i < [sourceNodePaths count]; i++) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:[sourceNodePaths objectAtIndex:i]]) {
+                lastRootNode = i;
+                break;
+            }
+        }
+        
+        NSString* tempPath = [[[_nodes objectAtIndex:lastRootNode] stringByAppendingString:path] retain];
+        BOOL isDir;
+        if ([[NSFileManager defaultManager] fileExistsAtPath:tempPath isDirectory:&isDir]) {
+            if (includePaths) {
+                [nodePaths addObject:tempPath];
+            } else {
+                [nodePaths addObject:[_nodes objectAtIndex:i]];
+            }
+        }
+    }
+    else
+    {*/
+        for (i = 0; i < [_nodes count]; i++) {
+            NSString* tempPath = [[[_nodes objectAtIndex:i] stringByAppendingString:path] retain];
+            BOOL isDir;
+            if ([[NSFileManager defaultManager] fileExistsAtPath:tempPath isDirectory:&isDir]) {
+                
+                if(!isDir)
+                {
+                    lastRootNode = i;
+                }
+                if (includePaths) {
+                    [nodePaths addObject:tempPath];
+                } else {
+                    [nodePaths addObject:[_nodes objectAtIndex:i]];
+                }
+
+                if (firstOnly)
+                    break;
+            }
+        }
+    //}
 	
 	int minPaths = [self isRedundantPath:path] ? 2 : 1;
 	
 	while (createNew && [nodePaths count] < minPaths) {
-	
-		int randomNode = random() % [_nodes count];
+        NSLog(@"Last root node is currently %i",lastRootNode);
+        if(sourceNodePaths != nil)
+        {
+            //TODO: Should we lookup all source nodes?
+
+            //This will happen when moving a file.
+            //We want to move the file at the same physical location
+            // so we loop through the root nodes to see which one is the root for the source. Then use that.
+            NSString *sourceNodePath = [sourceNodePaths objectAtIndex:0];
+            for(i = 0; i < [_nodes count]; i++)
+            {
+                NSString *rootNode = [_nodes objectAtIndex:i];
+                if([[sourceNodePath substringToIndex:[rootNode length]] isEqualToString:rootNode])
+                {
+                    lastRootNode = i;
+                    break;
+                }
+            }
+        }
+        int nodeIndex = lastRootNode; //TODO: Create new files on last queried root location. This is kinda unpredictable
+        NSLog(@"Using last root node %i  for %@",nodeIndex,path);
+        
+		//int randomNode = random() % [_nodes count];
 		//NSLog(@"randomly chose node %d in nodePathsForPath", randomNode);
-		[nodePaths addObject:[[[_nodes objectAtIndex:randomNode] stringByAppendingString:path] retain]];
+		[nodePaths addObject:[[[_nodes objectAtIndex:nodeIndex] stringByAppendingString:path] retain]];
 		
 		// if this is a redundant path, select another (different) random node and add its path
-		if ([self isRedundantPath:path]) {
-			int previousNode = randomNode;
+        if ([self isRedundantPath:path]) {
+			int previousNode = nodeIndex;
 			
-			while (randomNode == previousNode) {
-				randomNode = random() % [_nodes count];
+			while (nodeIndex == previousNode) {
+				nodeIndex = random() % [_nodes count];
 			}
 		
-			[nodePaths addObject:[[[_nodes objectAtIndex:randomNode] stringByAppendingString:path] retain]];
+			[nodePaths addObject:[[[_nodes objectAtIndex:nodeIndex] stringByAppendingString:path] retain]];
 			
 		}
 		
@@ -111,10 +162,12 @@
 	
 }
 
+//TODO: Not supported right now
 -(BOOL) isRedundantPath:(NSString*)path {
+    return NO;
 	NSRange textRange;
 	
-	NSLog(@"in isRedundantPath, checking path %@", path);
+	//NSLog(@"in isRedundantPath, checking path %@", path);
 	
 	for (NSString* redundantPath in _redundantPaths) {
 		
@@ -127,7 +180,7 @@
 		}
 	}
 	
-	NSLog(@"returning NO");
+	//NSLog(@"returning NO");
 
 	return NO;
 }
