@@ -4,7 +4,7 @@ PoolFS
 Fork of https://github.com/mungler/PoolFS
 
 PoolFS is a file system extension for OSXFUSE http://osxfuse.github.io
-Similar solutions exists e.g. UnionFS, AuFS, mhddfs or "mount -o union". But none have the capability of easily display a merged folder structure from any folders on any drive and still function as any other folder.
+Similar solutions exists e.g. UnionFS, AuFS, mhddfs or "mount -o union", but none have the capability of easily presenting a merged folder structure from any folders on any drive and still function as any other folder.
 
 This fork might wander off in another direction than the original idea.
 The main focus of this fork will be on virtually merging folder structures from several locations and drives, and use it without more effort than it would be on a regular folder. Recurrency is not supported at the moment.
