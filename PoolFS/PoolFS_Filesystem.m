@@ -645,4 +645,45 @@
 	return YES; //TODO: handle errors properly
 }
 
+
+#pragma mark Service
+
+
+- (void)goToRealLocation:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error
+{
+    if ( [[pboard types] containsObject:NSFilenamesPboardType] ) {
+        NSArray *paths = [pboard propertyListForType:NSFilenamesPboardType];
+        
+        NSString *path = [paths objectAtIndex:0];
+        
+        //TODO: Get this globally
+        NSString *mountPath = @"/Volumes/PoolFS";
+        
+        if([[path substringToIndex:[mountPath length]] isEqualToString:mountPath])
+        {
+            path = [path substringFromIndex:[mountPath length]];
+            NSLog(@"Path: %@",path);
+            NSArray *nodePaths = [_manager nodePathsForPath:path error:*error firstOnly:YES];
+            
+            NSString *realPath;
+            if([nodePaths count] > 0)
+            {
+                realPath = [nodePaths objectAtIndex:0];
+                
+                if(realPath != nil)
+                {
+                    [pboard clearContents];
+                    [pboard writeObjects:[NSArray arrayWithObject:realPath]];
+                    
+                    NSPerformService(@"Finder/Reveal", pboard);
+                }
+            }
+        }
+        else
+        {
+            NSPerformService(@"Finder/Reveal", pboard);
+        }
+    }
+}
+
 @end

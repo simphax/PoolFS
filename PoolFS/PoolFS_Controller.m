@@ -118,11 +118,13 @@
 	[options addObject:@"allow_other"];
 	//[options addObject:@"kernel_cache"];
 	
-	[options addObject:@"volname=PoolFS"];
+	[options addObject:@"volname=Projekt"];
 	[fs_ mountAtPath:mountPath 
 		 withOptions:options];
+    
+    //Register service
+    [NSApp setServicesProvider:fs_delegate_];
 }
-
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
