@@ -9,6 +9,9 @@
 #import "LocationSelectWindow.h"
 
 @interface LocationSelectWindow ()
+{
+    NSDictionary *_result;
+}
 
 @property (strong, nonatomic) NSString *path;
 
@@ -51,15 +54,21 @@
     [self.window makeKeyAndOrderFront:self];
     [NSApp runModalForWindow:self.window];
     
-    NSIndexSet *selectedIndexes = [_collectionView selectionIndexes];
-    NSNumber *selectedIndex = [NSNumber numberWithInteger:[selectedIndexes firstIndex]];
-    NSDictionary *returnDict = [[NSDictionary alloc] initWithObjectsAndKeys:selectedIndex,@"selectedIndex", nil];
-    
-    return returnDict;
+    return _result;
 }
 
 - (IBAction)chooseSelectedAndClose:(id)sender {
     
+    NSIndexSet *selectedIndexes = [_collectionView selectionIndexes];
+    NSNumber *selectedIndex = [NSNumber numberWithInteger:[selectedIndexes firstIndex]];
+    _result = [[NSDictionary alloc] initWithObjectsAndKeys:selectedIndex,@"selectedIndex", nil];
+    
+    [self close];
+    [NSApp stopModal];
+}
+
+- (IBAction)cancel:(id)sender {
+    _result = nil;
     [self close];
     [NSApp stopModal];
 }

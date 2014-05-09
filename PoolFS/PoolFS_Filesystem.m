@@ -205,12 +205,20 @@
     
     NSDictionary *returnDict = [locationSelectWindow runModalWidthNodes:rootNodes forPath:path];
     
-    NSString *result = [rootNodes objectAtIndex:[[returnDict objectForKey:@"selectedIndex"] integerValue]];
-    
-    NSLog(@"Selected node in modal: %@",result);
-    return result;
+    if(returnDict != nil)
+    {
+        NSString *result = [rootNodes objectAtIndex:[[returnDict objectForKey:@"selectedIndex"] integerValue]];
+        
+        NSLog(@"Selected node in modal: %@",result);
+        return result;
+    }
+    else
+    {
+        return nil;
+    }
 }
 
+//TODO: Will not work with redundant path
 - (BOOL)createFileAtPath:(NSString *)path
               attributes:(NSDictionary *)attributes
                 userData:(id *)userData
@@ -220,34 +228,40 @@
     
     NSString* fileName = [[path lastPathComponent] stringByDeletingPathExtension];
     
-    NSArray* nodePaths;
+    NSArray* nodePaths = nil;
     
     if(![[fileName substringToIndex:1] isEqualToString:@"."])
     {
         NSString *rootPath = [self chooseLocationModalForPath:path];
         
-        nodePaths = [_manager nodePathsForPath:path error:error firstOnly:NO createNew:YES forNodePaths:[NSArray arrayWithObject:rootPath] includePaths:YES];
+        if(rootPath != nil)
+        {
+            nodePaths = [_manager nodePathsForPath:path error:error firstOnly:YES createNew:YES forNodePaths:[NSArray arrayWithObject:rootPath] includePaths:YES];
+        }
     }
 	else
     {
         nodePaths = [_manager nodePathsForPath:path error:error createNew:YES];
     }
 	
-	for (id nodePath in nodePaths) {
-		mode_t mode = [[attributes objectForKey:NSFilePosixPermissions] longValue];  
-		int fd = creat([nodePath UTF8String], mode);
-		if ( fd < 0 ) {
-			*error = [NSError errorWithPOSIXCode:errno];
-			NSLog(@"create failed");
-			//return NO;
-		}
-		*userData = [NSNumber numberWithLong:fd];
-		//NSLog(@"create succss");
-		//return YES;
+    if(nodePaths != nil)
+    {
+        for (id nodePath in nodePaths) {
+            mode_t mode = [[attributes objectForKey:NSFilePosixPermissions] longValue];  
+            int fd = creat([nodePath UTF8String], mode);
+            if ( fd < 0 ) {
+                *error = [NSError errorWithPOSIXCode:errno];
+                NSLog(@"create failed");
+                return NO;
+            }
+            *userData = [NSNumber numberWithLong:fd];
+            NSLog(@"create succss");
+            return YES;// Only first node...
+        }
 	}
-	
-	return YES; // TODO: handle errors correctly
-	
+    //We'll get here if we pressed cancel in the modal dialog
+    *error = [NSError errorWithPOSIXCode:ECANCELED];
+    return NO;
 }
 
 #pragma mark Linking an Item
