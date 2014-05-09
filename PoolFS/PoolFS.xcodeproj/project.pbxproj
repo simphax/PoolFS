@@ -14,6 +14,11 @@
 		9819EDE41397CC66000F26D1 /* NSError+POSIX.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819EDE31397CC66000F26D1 /* NSError+POSIX.m */; };
 		9819EDE71397CC77000F26D1 /* NodeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819EDE61397CC77000F26D1 /* NodeManager.m */; };
 		F429ACA7191BA0A100F86BC5 /* PoolFS.icns in Resources */ = {isa = PBXBuildFile; fileRef = F429ACA6191BA0A100F86BC5 /* PoolFS.icns */; };
+		F4A90D23191CFCF50092708A /* LocationSelectWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = F4A90D21191CFCF50092708A /* LocationSelectWindow.m */; };
+		F4A90D24191CFCF50092708A /* LocationSelectWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4A90D22191CFCF50092708A /* LocationSelectWindow.xib */; };
+		F4A90D2B191D22E50092708A /* NodeCollectionViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F4A90D2A191D22E50092708A /* NodeCollectionViewItem.m */; };
+		F4A90D2E191D23E10092708A /* NodeCollectionViewItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4A90D2D191D23E10092708A /* NodeCollectionViewItemView.m */; };
+		F4C3240C191C5C8200BAD1F8 /* NodeCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C3240B191C5C8200BAD1F8 /* NodeCollectionView.m */; };
 		F4F86CDE191AC03700E428A6 /* OSXFUSE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F86CDD191AC03700E428A6 /* OSXFUSE.framework */; };
 		FFD925C00EE507A800A7B2B2 /* PoolFS_Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = FFD925BF0EE507A800A7B2B2 /* PoolFS_Controller.m */; };
 		FFD925C30EE5082D00A7B2B2 /* PoolFS_Filesystem.m in Sources */ = {isa = PBXBuildFile; fileRef = FFD925C20EE5082D00A7B2B2 /* PoolFS_Filesystem.m */; };
@@ -35,6 +40,15 @@
 		9819EDE51397CC77000F26D1 /* NodeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeManager.h; sourceTree = "<group>"; };
 		9819EDE61397CC77000F26D1 /* NodeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NodeManager.m; sourceTree = "<group>"; };
 		F429ACA6191BA0A100F86BC5 /* PoolFS.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = PoolFS.icns; sourceTree = "<group>"; };
+		F4A90D20191CFCF50092708A /* LocationSelectWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocationSelectWindow.h; path = Views/LocationSelectWindow.h; sourceTree = "<group>"; };
+		F4A90D21191CFCF50092708A /* LocationSelectWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LocationSelectWindow.m; path = Views/LocationSelectWindow.m; sourceTree = "<group>"; };
+		F4A90D22191CFCF50092708A /* LocationSelectWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LocationSelectWindow.xib; path = Views/LocationSelectWindow.xib; sourceTree = "<group>"; };
+		F4A90D29191D22E50092708A /* NodeCollectionViewItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NodeCollectionViewItem.h; path = Views/NodeCollectionViewItem.h; sourceTree = "<group>"; };
+		F4A90D2A191D22E50092708A /* NodeCollectionViewItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NodeCollectionViewItem.m; path = Views/NodeCollectionViewItem.m; sourceTree = "<group>"; };
+		F4A90D2C191D23E10092708A /* NodeCollectionViewItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NodeCollectionViewItemView.h; path = Views/NodeCollectionViewItemView.h; sourceTree = "<group>"; };
+		F4A90D2D191D23E10092708A /* NodeCollectionViewItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NodeCollectionViewItemView.m; path = Views/NodeCollectionViewItemView.m; sourceTree = "<group>"; };
+		F4C3240A191C5C8200BAD1F8 /* NodeCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NodeCollectionView.h; path = Views/NodeCollectionView.h; sourceTree = "<group>"; };
+		F4C3240B191C5C8200BAD1F8 /* NodeCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NodeCollectionView.m; path = Views/NodeCollectionView.m; sourceTree = "<group>"; };
 		F4F86CDB191AC01A00E428A6 /* MacFUSE.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MacFUSE.framework; path = /Library/Frameworks/MacFUSE.framework; sourceTree = "<absolute>"; };
 		F4F86CDD191AC03700E428A6 /* OSXFUSE.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSXFUSE.framework; path = /Library/Frameworks/OSXFUSE.framework; sourceTree = "<absolute>"; };
 		FFD925BE0EE507A800A7B2B2 /* PoolFS_Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PoolFS_Controller.h; sourceTree = "<group>"; };
@@ -102,6 +116,7 @@
 		29B97314FDCFA39411CA2CEA /* PoolFS */ = {
 			isa = PBXGroup;
 			children = (
+				F4C32404191C565700BAD1F8 /* Views */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -138,6 +153,22 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F4C32404191C565700BAD1F8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F4C3240A191C5C8200BAD1F8 /* NodeCollectionView.h */,
+				F4C3240B191C5C8200BAD1F8 /* NodeCollectionView.m */,
+				F4A90D20191CFCF50092708A /* LocationSelectWindow.h */,
+				F4A90D21191CFCF50092708A /* LocationSelectWindow.m */,
+				F4A90D22191CFCF50092708A /* LocationSelectWindow.xib */,
+				F4A90D29191D22E50092708A /* NodeCollectionViewItem.h */,
+				F4A90D2A191D22E50092708A /* NodeCollectionViewItem.m */,
+				F4A90D2C191D23E10092708A /* NodeCollectionViewItemView.h */,
+				F4A90D2D191D23E10092708A /* NodeCollectionViewItemView.m */,
+			);
+			name = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -194,6 +225,7 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
 				F429ACA7191BA0A100F86BC5 /* PoolFS.icns in Resources */,
+				F4A90D24191CFCF50092708A /* LocationSelectWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -205,10 +237,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
+				F4A90D2E191D23E10092708A /* NodeCollectionViewItemView.m in Sources */,
 				FFD925C00EE507A800A7B2B2 /* PoolFS_Controller.m in Sources */,
+				F4A90D23191CFCF50092708A /* LocationSelectWindow.m in Sources */,
 				FFD925C30EE5082D00A7B2B2 /* PoolFS_Filesystem.m in Sources */,
+				F4C3240C191C5C8200BAD1F8 /* NodeCollectionView.m in Sources */,
 				9819EDE41397CC66000F26D1 /* NSError+POSIX.m in Sources */,
 				9819EDE71397CC77000F26D1 /* NodeManager.m in Sources */,
+				F4A90D2B191D22E50092708A /* NodeCollectionViewItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

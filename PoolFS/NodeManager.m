@@ -25,6 +25,20 @@
 	[super dealloc];
 }
 
+-(NSArray*) availableRootNodes {
+    NSMutableArray *available = [NSMutableArray array];
+    for(NSString *node in _nodes)
+    {
+        NSError *error;
+        NSArray *dirContent = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:node error:&error];
+        if(dirContent != nil) //Path exists.
+        {
+            [available addObject:node];
+        }
+    }
+    return available;
+}
+
 -(NSString*) nodeForPath:(NSString*)path error:(NSError **)error {
 	return [[self nodePathsForPath:path error:error includePaths:NO] objectAtIndex:0];
 }

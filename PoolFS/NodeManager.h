@@ -18,6 +18,8 @@
 -(id) initWithNodes:(NSArray*)nodes andRedundantPaths:(NSArray*)redundantPaths;
 -(void) dealloc;
 
+-(NSArray*) availableRootNodes;
+
 -(NSString*) nodeForPath:(NSString*)path error:(NSError **)error;
 
 // TODO: change these to return id so firstOnly can return a single path

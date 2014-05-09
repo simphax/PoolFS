@@ -33,6 +33,7 @@
 #import <OSXFUSE/OSXFUSE.h>
 #import "NSError+POSIX.h"
 #import "NodeManager.h"
+#import "LocationSelectWindow.h"
 
 @implementation PoolFS_Filesystem
 
@@ -40,6 +41,7 @@
 	if ((self = [super init])) {
 		_manager = [manager retain];
 	}
+    
 	return self;
 }
 
@@ -195,14 +197,41 @@
 	return YES; // TODO: handle errors properly
 }
 
-- (BOOL)createFileAtPath:(NSString *)path 
+-(NSString *) chooseLocationModalForPath:(NSString *) path
+{
+    LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
+    
+    NSArray *rootNodes = [_manager availableRootNodes];
+    
+    NSDictionary *returnDict = [locationSelectWindow runModalWidthNodes:rootNodes forPath:path];
+    
+    NSString *result = [rootNodes objectAtIndex:[[returnDict objectForKey:@"selectedIndex"] integerValue]];
+    
+    NSLog(@"Selected node in modal: %@",result);
+    return result;
+}
+
+- (BOOL)createFileAtPath:(NSString *)path
               attributes:(NSDictionary *)attributes
                 userData:(id *)userData
                    error:(NSError **)error {
 	
 	NSLog(@"createFileAtPath: %@", path);
-	
-	NSArray* nodePaths = [_manager nodePathsForPath:path error:error createNew:YES];
+    
+    NSString* fileName = [[path lastPathComponent] stringByDeletingPathExtension];
+    
+    NSArray* nodePaths;
+    
+    if(![[fileName substringToIndex:1] isEqualToString:@"."])
+    {
+        NSString *rootPath = [self chooseLocationModalForPath:path];
+        
+        nodePaths = [_manager nodePathsForPath:path error:error firstOnly:NO createNew:YES forNodePaths:[NSArray arrayWithObject:rootPath] includePaths:YES];
+    }
+	else
+    {
+        nodePaths = [_manager nodePathsForPath:path error:error createNew:YES];
+    }
 	
 	for (id nodePath in nodePaths) {
 		mode_t mode = [[attributes objectForKey:NSFilePosixPermissions] longValue];  
