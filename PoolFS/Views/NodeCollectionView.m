@@ -35,10 +35,17 @@
     return item;
 }
 
-- (void)setSelectionIndexes:(NSIndexSet *)indexes
+- (void)keyDown:(NSEvent *)theEvent
 {
-    [super setSelectionIndexes:indexes];
-    NSLog(@"setSelectionIndexes: %@",indexes);
+    //Pass return key event to window
+    if([theEvent keyCode] == 36 || [theEvent keyCode] == 49)
+    {
+        [self.window keyDown:theEvent];
+    }
+    else
+    {
+        [super keyDown:theEvent];
+    }
 }
 
 @end

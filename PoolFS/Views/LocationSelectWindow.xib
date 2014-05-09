@@ -70,6 +70,9 @@ DQ
                         <buttonCell key="cell" type="check" title="Don't ask again" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="3vB-nJ-ZQP">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
+                            <string key="keyEquivalent" base64-UTF8="YES">
+IA
+</string>
                         </buttonCell>
                     </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5lo-Bu-X48">
@@ -113,11 +116,6 @@ DQ
                 </textField>
             </subviews>
         </view>
-        <collectionViewItem id="Yce-8f-JGH">
-            <connections>
-                <outlet property="view" destination="m46-AA-Mv1" id="vRV-gq-zhH"/>
-            </connections>
-        </collectionViewItem>
         <view id="m46-AA-Mv1">
             <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
             <autoresizingMask key="autoresizingMask"/>

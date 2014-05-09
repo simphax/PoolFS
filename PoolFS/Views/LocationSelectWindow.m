@@ -44,16 +44,6 @@
     return @"LocationSelectWindow";
 }
 
-- (BOOL)canBecomeKeyWindow
-{
-    return YES;
-}
-
-- (BOOL)canBecomeMainWindow
-{
-    return YES;
-}
-
 -(NSDictionary *) runModalWidthNodes:(NSArray *)nodes forPath:(NSString *)path
 {
     _nodePaths = nodes;
@@ -73,6 +63,5 @@
     [self close];
     [NSApp stopModal];
 }
-
 
 @end
