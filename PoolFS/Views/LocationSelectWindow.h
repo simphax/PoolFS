@@ -20,4 +20,6 @@
 
 @property (assign) IBOutlet NSTextField *infoText;
 
+- (IBAction)cancel:(id)sender;
+
 @end
