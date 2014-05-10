@@ -48,6 +48,9 @@
     //Timeout in 50 seconds
     //TODO: Set timeout as a setting? Or get it from somewhere. 60 seconds seems to be the OSXFUSE and Finder timeout.
     dispatch_async(dispatch_get_main_queue(), ^{
+        [self.window setContentMinSize:NSMakeSize(543, 200)];
+        [self.window setContentMaxSize:NSMakeSize(543, 2000)];
+        
         _timeoutTimer = [NSTimer timerWithTimeInterval:50.0
                                                 target: self
                                               selector: @selector(timeout:)
