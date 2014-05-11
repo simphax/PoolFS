@@ -85,8 +85,9 @@
     _timeoutTimer = nil;
     
     NSIndexSet *selectedIndexes = [_collectionView selectionIndexes];
-    NSNumber *selectedIndex = [NSNumber numberWithInteger:[selectedIndexes firstIndex]];
-    _result = [[NSDictionary alloc] initWithObjectsAndKeys:selectedIndex,@"selectedIndex", nil];
+    NSInteger *selectedIndex = [selectedIndexes firstIndex];
+    NSString *selectedNode = [_nodePaths objectAtIndex:selectedIndex];
+    _result = [[NSDictionary alloc] initWithObjectsAndKeys:selectedNode,@"selectedNode", nil];
     
     [self close];
     [NSApp stopModal];

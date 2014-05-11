@@ -50,6 +50,30 @@
 	[super dealloc];
 }
 
+#pragma mark GUI
+
+-(NSString *) chooseLocationModalForPath:(NSString *) path
+{
+    LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
+    
+    NSArray *rootNodes = [_manager availableRootNodes];
+    
+    NSDictionary *returnDict = [locationSelectWindow runModalWidthNodes:rootNodes forPath:path];
+    
+    if(returnDict != nil)
+    {
+        NSString *result = [returnDict objectForKey:@"selectedNode"];
+        
+        NSLog(@"Selected node in modal: %@",result);
+        return result;
+    }
+    else
+    {
+        return nil;
+    }
+}
+
+
 #pragma mark Moving an Item
 
 //TODO: Won't work with redundant path
@@ -195,27 +219,6 @@
 	}
 	
 	return YES; // TODO: handle errors properly
-}
-
--(NSString *) chooseLocationModalForPath:(NSString *) path
-{
-    LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
-    
-    NSArray *rootNodes = [_manager availableRootNodes];
-    
-    NSDictionary *returnDict = [locationSelectWindow runModalWidthNodes:rootNodes forPath:path];
-    
-    if(returnDict != nil)
-    {
-        NSString *result = [rootNodes objectAtIndex:[[returnDict objectForKey:@"selectedIndex"] integerValue]];
-        
-        NSLog(@"Selected node in modal: %@",result);
-        return result;
-    }
-    else
-    {
-        return nil;
-    }
 }
 
 //TODO: Will not work with redundant path
