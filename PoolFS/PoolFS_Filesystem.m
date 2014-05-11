@@ -451,16 +451,39 @@
 - (NSDictionary *)attributesOfItemAtPath:(NSString *)path
                                 userData:(id)userData
                                    error:(NSError **)error {
-	
-	//NSLog(@"attributesOfItemAtPath:%@",path);
+	//TODO: use something else than nsfilemanager to get all extended attributes.
+    
+	NSLog(@"attributesOfItemAtPath:%@",path);
 	NSArray *allNodes = [_manager nodePathsForPath:path error:error];
 	NSString* p = [allNodes objectAtIndex:0];
     //NSLog(@"attributesOfItemAtPath Node path: %@",p);
 	NSDictionary* attribs = 
     [[NSFileManager defaultManager] attributesOfItemAtPath:p error:error];
-	//NSLog(@"Attr: %@", attribs);
     
-    return attribs;
+    //Meanwhile we're adding the extended attributes by calling out extendedAttributesOfItemAtPath
+    //NSLog(@"Attr: %@", attribs);
+    NSMutableDictionary *attribsWithExtended = [attribs mutableCopy];
+    NSArray *extendedAttribs = [self extendedAttributesOfItemAtPath:path error:error];
+    
+    if(extendedAttribs != nil && [extendedAttribs count] > 0)
+    {
+        //It seems like finder is okay with an array of extended attribs without the actual value.
+        [attribsWithExtended setObject:extendedAttribs forKey:@"NSFileExtendedAttributes"];
+        /*
+        NSMutableDictionary *extendedAttribsWithValues = [[NSMutableDictionary alloc] init];
+        for(NSString *attrib in extendedAttribs)
+        {
+            [extendedAttribsWithValues setObject:[self valueOfExtendedAttribute:attrib ofItemAtPath:path position:0 error:error] forKey:attrib];
+        }
+        [attribsWithExtended setObject:extendedAttribsWithValues forKey:@"NSFileExtendedAttributes"];
+        */
+        //NSLog(@"Attribs with extended attribs inserted: %@", attribsWithExtended);
+        return attribsWithExtended;
+    }
+    else
+    {
+        return attribs;
+    }
 }
 
 - (NSDictionary *)attributesOfFileSystemForPath:(NSString *)path
@@ -517,7 +540,6 @@
 #pragma mark Extended Attributes
 
 - (NSArray *)extendedAttributesOfItemAtPath:(NSString *)path error:(NSError **)error {
-    return nil;
 	NSLog(@"extendedAttributesOfItemAtPath:%@",path);
 	
 	NSString* p = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
@@ -541,7 +563,7 @@
 		ptr += ([s length] + 1);
 	}
     
-    NSLog(@"contents: %@",contents);
+    //NSLog(@"contents: %@",contents);
 	return contents;
 }
 
@@ -670,7 +692,7 @@
                    ofItemAtPath:(NSString *)path
                           error:(NSError **)error {
 	
-	NSLog(@"removeExtendedAttribute:ofItemAtPath:%@",path);
+	NSLog(@"removeExtendedAttribute:%@fItemAtPath:%@",name,path);
 	
 	NSArray* nodePaths = [_manager nodePathsForPath:path error:error];
 	
