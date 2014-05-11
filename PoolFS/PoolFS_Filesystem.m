@@ -147,6 +147,7 @@
                         NSLog(@"replacing %@ with %@",destNodePath,[sourceNodePaths objectAtIndex:0]);
                         [[NSFileManager defaultManager] removeItemAtPath:destNodePath error:error];
                         if(![[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:destNodePath error:error]) return NO;
+                        [[NSFileManager defaultManager] removeItemAtPath:[sourceNodePaths objectAtIndex:0] error:error];
                     }
                     else
                     {
@@ -714,8 +715,66 @@
 }
 
 
-#pragma mark Service
+#pragma mark Services
 
+- (void)moveToNode:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error
+{
+    if ( [[pboard types] containsObject:NSFilenamesPboardType] ) {
+        NSArray *paths = [pboard propertyListForType:NSFilenamesPboardType];
+        
+        NSString *path = [paths objectAtIndex:0];
+        
+        //TODO: Get this globally
+        NSString *mountPath = @"/Volumes/PoolFS";
+        
+        if([[path substringToIndex:[mountPath length]] isEqualToString:mountPath])
+        {
+            NSError *errError;
+            
+            path = [path substringFromIndex:[mountPath length]];
+            NSArray *sourceNodePaths = [_manager nodePathsForPath:path error:&errError firstOnly:YES];
+            
+            NSString *newNode = [self chooseLocationModalForPath:path];
+            
+            NSString *newPath = [newNode stringByAppendingString:path];
+            
+            NSLog(@"Move %@ to %@",path,newPath);
+            
+            //TODO: WARNING This will replace the file if there is a duplicate
+            
+            [_manager createDirectoriesForNodePath:newPath error:&errError];
+            NSLog(@"replacing %@ with %@",newPath,[sourceNodePaths objectAtIndex:0]);
+            [[NSFileManager defaultManager] removeItemAtPath:newPath error:&errError];
+            if([[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:newPath error:&errError])
+            {
+                [[NSFileManager defaultManager] removeItemAtPath:[sourceNodePaths objectAtIndex:0] error:&errError];
+            }
+            
+            /*
+            NSLog(@"Path: %@",path);
+            NSArray *nodePaths = [_manager nodePathsForPath:path error:*error firstOnly:YES];
+            
+            NSString *realPath;
+            if([nodePaths count] > 0)
+            {
+                realPath = [nodePaths objectAtIndex:0];
+                
+                if(realPath != nil)
+                {
+                    [pboard clearContents];
+                    [pboard writeObjects:[NSArray arrayWithObject:realPath]];
+                    
+                    NSPerformService(@"Finder/Reveal", pboard);
+                }
+            }
+             */
+        }
+        else
+        {
+            
+        }
+    }
+}
 
 - (void)goToRealLocation:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error
 {
