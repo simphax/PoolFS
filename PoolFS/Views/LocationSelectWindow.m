@@ -38,16 +38,17 @@
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-    [_collectionView setContent:_nodePaths];
-    //Select the first row
-    [_collectionView setSelectionIndexes:[NSIndexSet indexSetWithIndex:0]];
-    self.infoText.stringValue = [NSString stringWithFormat:@"Choose the node on which to place the file \"%@\"",[_path lastPathComponent]];
-    
-    
-    
-    //Timeout in 50 seconds
-    //TODO: Set timeout as a setting? Or get it from somewhere. 60 seconds seems to be the OSXFUSE and Finder timeout.
     dispatch_async(dispatch_get_main_queue(), ^{
+        [_collectionView setContent:_nodePaths];
+        //Select the first row
+        [_collectionView setSelectionIndexes:[NSIndexSet indexSetWithIndex:0]];
+        self.infoText.stringValue = [NSString stringWithFormat:@"Choose the node on which to place the file \"%@\"",[_path lastPathComponent]];
+    
+    
+    
+        //Timeout in 50 seconds
+        //TODO: Set timeout as a setting? Or get it from somewhere. 60 seconds seems to be the OSXFUSE and Finder timeout.
+    
         [self.window setContentMinSize:NSMakeSize(543, 200)];
         [self.window setContentMaxSize:NSMakeSize(543, 2000)];
         

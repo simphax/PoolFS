@@ -28,6 +28,7 @@
 // probably not a good idea to mount "/" through this filesystem.
 
 #define TAG_PREFIX "\u200B"
+#define TAG_COLOR 1
 
 #import <sys/xattr.h>
 #import <sys/stat.h>
@@ -621,7 +622,7 @@
             {
                 //NSLog(@"FinderInfo %@: %@",path,data);
                 NSRange range = {9, 1};
-                Byte replace = 0x02;
+                Byte replace = TAG_COLOR << 1;
                 
                 Byte check = 0x00;
                 [data getBytes:&check range:range];
@@ -661,7 +662,7 @@
                 [unserializedTags addObject:[NSString stringWithFormat:@"%@Location: %@",@TAG_PREFIX,[allNodes objectAtIndex:0]]];
                 for(int i=1; i < [allNodes count]; i++)
                 {
-                    [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n1",@TAG_PREFIX,[allNodes objectAtIndex:i]]];
+                    [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n%i",@TAG_PREFIX,[allNodes objectAtIndex:i],TAG_COLOR]];
                 }
                 //NSLog(@"tags: %@",unserializedTags);
                 
@@ -683,6 +684,22 @@
 	
 	NSLog(@"setExtendedAttribute:%@ ofItemAtPath:%@",name,path);
     
+	NSArray* nodePaths = [_manager nodePathsForPath:path error:error firstOnly:YES];
+    
+    //Don't save the Grey tag, otherwise it will always do that when copying a duplicate file.
+    //TODO: Should find a way to not needing to override a colored tag
+    if([name isEqualToString:@"com.apple.FinderInfo"])
+    {
+        NSMutableData *mutableValue = [value mutableCopy];
+        
+        NSRange range = {9, 1};
+        Byte check = 0x00;
+        Byte replace = TAG_COLOR << 1;
+        [mutableValue getBytes:&check range:range];
+        replace = (check & ~replace);
+        [mutableValue replaceBytesInRange:range withBytes:&replace];
+        value = mutableValue;
+    }
     //Don't save injected tags
     if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
     {
@@ -702,6 +719,10 @@
                 {
                     [unserializedTags removeObject:tag];
                 }
+                else if([[tag substringFromIndex:([tag length]-1)] isEqualToString:[NSString stringWithFormat:@"%i",TAG_COLOR]])
+                {
+                    [unserializedTags removeObject:tag];
+                }
             }
             
             value = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:nil];
@@ -714,8 +735,6 @@
 	// TODO: Why is this necessary?
 	
 	options &= ~(XATTR_NOSECURITY | XATTR_NODEFAULT);
-	
-	NSArray* nodePaths = [_manager nodePathsForPath:path error:error firstOnly:YES];
 	
 	for (id nodePath in nodePaths) {
 		
