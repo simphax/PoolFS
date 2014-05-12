@@ -737,37 +737,41 @@
             NSString *newNode = [self chooseLocationModalForPath:path];
             
             NSString *newPath = [newNode stringByAppendingString:path];
+            NSString *newPathFolder = [newPath substringToIndex:([newPath length] - [[newPath lastPathComponent] length])];
             
-            NSLog(@"Move %@ to %@",path,newPath);
             
-            //TODO: WARNING This will replace the file if there is a duplicate
-            
+            NSLog(@"Move %@ to %@",path,newPathFolder);
+           
             [_manager createDirectoriesForNodePath:newPath error:&errError];
-            NSLog(@"replacing %@ with %@",newPath,[sourceNodePaths objectAtIndex:0]);
-            [[NSFileManager defaultManager] removeItemAtPath:newPath error:&errError];
-            if([[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:newPath error:&errError])
+            if([[NSFileManager defaultManager] fileExistsAtPath:newPath] )
+            {
+                NSAlert *replaceAlert = [NSAlert alertWithMessageText:@"Warning"
+                                defaultButton:@"Cancel"
+                              alternateButton:@"Replace"
+                                  otherButton:nil
+                    informativeTextWithFormat:@"Do you want to replace %@ with %@?",newPath,[sourceNodePaths objectAtIndex:0]];
+                if([replaceAlert runModal] == NSAlertDefaultReturn)
+                {
+                    return;
+                }
+            }
+            
+            NSString *appleScript = [NSString stringWithFormat:@"tell application \"Finder\"\n\
+                                     move POSIX file \"%@\" to POSIX file \"%@\" with replacing\n\
+                                     end tell\n\
+                                     ",
+                                     [sourceNodePaths objectAtIndex:0],newPathFolder ];
+            
+            NSLog(@"Running applescript: %@",appleScript);
+            NSAppleScript *run = [[NSAppleScript alloc] initWithSource:appleScript];
+            NSDictionary *errDict = nil;
+            [run executeAndReturnError:&errDict];
+            
+            //We successfully moved the file but it was not removed from the source. (We copied between drives). Remove the source file
+            if(errDict == nil && [[NSFileManager defaultManager] fileExistsAtPath:[sourceNodePaths objectAtIndex:0]] && [[NSFileManager defaultManager] fileExistsAtPath:newPath] )
             {
                 [[NSFileManager defaultManager] removeItemAtPath:[sourceNodePaths objectAtIndex:0] error:&errError];
             }
-            
-            /*
-            NSLog(@"Path: %@",path);
-            NSArray *nodePaths = [_manager nodePathsForPath:path error:*error firstOnly:YES];
-            
-            NSString *realPath;
-            if([nodePaths count] > 0)
-            {
-                realPath = [nodePaths objectAtIndex:0];
-                
-                if(realPath != nil)
-                {
-                    [pboard clearContents];
-                    [pboard writeObjects:[NSArray arrayWithObject:realPath]];
-                    
-                    NSPerformService(@"Finder/Reveal", pboard);
-                }
-            }
-             */
         }
         else
         {
