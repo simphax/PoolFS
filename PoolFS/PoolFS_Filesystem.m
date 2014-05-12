@@ -794,19 +794,20 @@
         {
             path = [path substringFromIndex:[mountPath length]];
             NSLog(@"Path: %@",path);
-            NSArray *nodePaths = [_manager nodePathsForPath:path error:*error firstOnly:YES];
+            NSError *errError;
+            NSArray *nodePaths = [_manager nodePathsForPath:path error:&errError];
             
-            NSString *realPath;
             if([nodePaths count] > 0)
             {
-                realPath = [nodePaths objectAtIndex:0];
-                
-                if(realPath != nil)
-                {
-                    [pboard clearContents];
-                    [pboard writeObjects:[NSArray arrayWithObject:realPath]];
+                for (NSString *nodePath in nodePaths) {
                     
-                    NSPerformService(@"Finder/Reveal", pboard);
+                    if(nodePath != nil)
+                    {
+                        [pboard clearContents];
+                        [pboard writeObjects:[NSArray arrayWithObject:nodePath]];
+                        
+                        NSPerformService(@"Finder/Reveal", pboard);
+                    }
                 }
             }
         }
