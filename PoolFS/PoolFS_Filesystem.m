@@ -658,10 +658,10 @@
             {
                 NSError **error2;
                 
-                [unserializedTags addObject:[NSString stringWithFormat:@"%sLocation: %@",TAG_PREFIX,[allNodes objectAtIndex:0]]];
+                [unserializedTags addObject:[NSString stringWithFormat:@"%@Location: %@",@TAG_PREFIX,[allNodes objectAtIndex:0]]];
                 for(int i=1; i < [allNodes count]; i++)
                 {
-                    [unserializedTags addObject:[NSString stringWithFormat:@"%sDuplicate: %@\n1",TAG_PREFIX,[allNodes objectAtIndex:i]]];
+                    [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n1",@TAG_PREFIX,[allNodes objectAtIndex:i]]];
                 }
                 //NSLog(@"tags: %@",unserializedTags);
                 
