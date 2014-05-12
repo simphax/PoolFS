@@ -27,6 +27,8 @@
 // For example, you can mount "/tmp" in /Volumes/loop. Note: It is 
 // probably not a good idea to mount "/" through this filesystem.
 
+#define TAG_PREFIX "\u200B"
+
 #import <sys/xattr.h>
 #import <sys/stat.h>
 #import "PoolFS_Filesystem.h"
@@ -604,9 +606,11 @@
     }
     
     NSData *result = data;
+    
     if([allNodes count] > 1)
     {
         //Tells finder the last tag was red
+        
         if([name isEqualToString:@"com.apple.FinderInfo"])
         {
             if(data == nil)
@@ -617,8 +621,14 @@
             {
                 //NSLog(@"FinderInfo %@: %@",path,data);
                 NSRange range = {9, 1};
-                Byte replace = 0x0c;
-                [data replaceBytesInRange:range withBytes:&replace];
+                Byte replace = 0x02;
+                
+                Byte check = 0x00;
+                [data getBytes:&check range:range];
+                if(check == 0x00)
+                {
+                    [data replaceBytesInRange:range withBytes:&replace];
+                }
                 
                 //NSLog(@"ReplacInfo %@: %@",path,data);
             }
@@ -647,7 +657,12 @@
             if(unserializedTags != nil)
             {
                 NSError **error2;
-                [unserializedTags addObject:@"Duplicate\n6"];
+                
+                [unserializedTags addObject:[NSString stringWithFormat:@"%sLocation: %@",TAG_PREFIX,[allNodes objectAtIndex:0]]];
+                for(int i=1; i < [allNodes count]; i++)
+                {
+                    [unserializedTags addObject:[NSString stringWithFormat:@"%sDuplicate: %@\n1",TAG_PREFIX,[allNodes objectAtIndex:i]]];
+                }
                 //NSLog(@"tags: %@",unserializedTags);
                 
                 result = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:error2];
@@ -668,14 +683,39 @@
 	
 	NSLog(@"setExtendedAttribute:%@ ofItemAtPath:%@",name,path);
     
-	// Setting com.apple.FinderInfo happens in the kernel, so security related 
+    //Don't save injected tags
+    if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
+    {
+        NSMutableArray *unserializedTags;
+        NSPropertyListFormat format;
+        if(value != nil)
+        {
+            NSString *error2;
+            unserializedTags = [NSPropertyListSerialization propertyListFromData:value
+                                                                mutabilityOption:NSPropertyListMutableContainers
+                                                                          format:&format
+                                                                errorDescription:&error2];
+            
+            for(NSString *tag in unserializedTags)
+            {
+                if([[tag substringToIndex:1] isEqualToString:@TAG_PREFIX])
+                {
+                    [unserializedTags removeObject:tag];
+                }
+            }
+            
+            value = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:nil];
+        }
+    }
+    
+	// Setting com.apple.FinderInfo happens in the kernel, so security related
 	// bits are set in the options. We need to explicitly remove them or the call
 	// to setxattr will fail.
 	// TODO: Why is this necessary?
 	
 	options &= ~(XATTR_NOSECURITY | XATTR_NODEFAULT);
 	
-	NSArray* nodePaths = [_manager nodePathsForPath:path error:error];
+	NSArray* nodePaths = [_manager nodePathsForPath:path error:error firstOnly:YES];
 	
 	for (id nodePath in nodePaths) {
 		
@@ -803,10 +843,9 @@
                     
                     if(nodePath != nil)
                     {
-                        [pboard clearContents];
-                        [pboard writeObjects:[NSArray arrayWithObject:nodePath]];
-                        
-                        NSPerformService(@"Finder/Reveal", [pboard copy]);
+                        NSPasteboard *sendPboard = [NSPasteboard pasteboardWithUniqueName];
+                        [sendPboard writeObjects:[NSArray arrayWithObject:nodePath]];
+                        NSPerformService(@"Finder/Reveal", sendPboard);
                     }
                 }
             }
