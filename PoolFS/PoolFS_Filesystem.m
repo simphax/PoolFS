@@ -806,7 +806,7 @@
                         [pboard clearContents];
                         [pboard writeObjects:[NSArray arrayWithObject:nodePath]];
                         
-                        NSPerformService(@"Finder/Reveal", pboard);
+                        NSPerformService(@"Finder/Reveal", [pboard copy]);
                     }
                 }
             }
