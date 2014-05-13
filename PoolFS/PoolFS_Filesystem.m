@@ -634,42 +634,41 @@
                 //NSLog(@"ReplacInfo %@: %@",path,data);
             }
         }
+    }
+    
+    result = data;
         
-        result = data;
-        
-        //Injects a tag called "Duplicate" into the metadata
-        if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
+    //Injects a tag called "Duplicate" into the metadata
+    if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
+    {
+        NSMutableArray *unserializedTags;
+        NSPropertyListFormat format;
+        if(data != nil)
         {
-            NSMutableArray *unserializedTags;
-            NSPropertyListFormat format;
-            if(data != nil)
-            {
-                NSString *error2;
-                unserializedTags = [NSPropertyListSerialization propertyListFromData:data
-                                                                    mutabilityOption:NSPropertyListMutableContainers
-                                                                              format:&format
-                                                                    errorDescription:&error2];
-            }
-            else
-            {
-                unserializedTags = [[NSMutableArray alloc] init];
-                format = NSPropertyListBinaryFormat_v1_0;
-            }
-            if(unserializedTags != nil)
-            {
-                NSError **error2;
-                
-                [unserializedTags addObject:[NSString stringWithFormat:@"%@Location: %@",@TAG_PREFIX,[allNodes objectAtIndex:0]]];
-                for(int i=1; i < [allNodes count]; i++)
-                {
-                    [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n%i",@TAG_PREFIX,[allNodes objectAtIndex:i],TAG_COLOR]];
-                }
-                //NSLog(@"tags: %@",unserializedTags);
-                
-                result = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:error2];
-            }
+            NSString *error2;
+            unserializedTags = [NSPropertyListSerialization propertyListFromData:data
+                                                                mutabilityOption:NSPropertyListMutableContainers
+                                                                          format:&format
+                                                                errorDescription:&error2];
         }
-        
+        else
+        {
+            unserializedTags = [[NSMutableArray alloc] init];
+            format = NSPropertyListBinaryFormat_v1_0;
+        }
+        if(unserializedTags != nil)
+        {
+            NSError **error2;
+            
+            [unserializedTags addObject:[NSString stringWithFormat:@"%@Location: %@",@TAG_PREFIX,[allNodes objectAtIndex:0]]];
+            for(int i=1; i < [allNodes count]; i++)
+            {
+                [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n%i",@TAG_PREFIX,[allNodes objectAtIndex:i],TAG_COLOR]];
+            }
+            //NSLog(@"tags: %@",unserializedTags);
+            
+            result = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:error2];
+        }
     }
 
 	return result;
