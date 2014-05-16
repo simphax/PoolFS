@@ -7,6 +7,7 @@
 //
 
 #import "LocationSelectWindow.h"
+#import "NodeItem.h"
 
 @interface LocationSelectWindow ()
 {
@@ -39,9 +40,22 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_collectionView setContent:_nodePaths];
+        [_collectionView setContent:_nodeItems];
+
+        int index = 0;
+        
+        for(int i = 0; i<[_nodeItems count]; i++)
+        {
+            NodeItem *item = [_nodeItems objectAtIndex:i];
+            if(item.latestUsed)
+            {
+                index = i;
+                break;
+            }
+        }
+        
         //Select the first row
-        [_collectionView setSelectionIndexes:[NSIndexSet indexSetWithIndex:0]];
+        [_collectionView setSelectionIndexes:[NSIndexSet indexSetWithIndex:index]];
         self.infoText.stringValue = [NSString stringWithFormat:@"Choose the node on which to place the file \"%@\"",[_path lastPathComponent]];
     
     
@@ -52,7 +66,7 @@
         [self.window setContentMinSize:NSMakeSize(543, 200)];
         [self.window setContentMaxSize:NSMakeSize(543, 2000)];
         
-        _timeoutTimer = [NSTimer timerWithTimeInterval:50.0
+        _timeoutTimer = [NSTimer timerWithTimeInterval: 50.0
                                                 target: self
                                               selector: @selector(timeout:)
                                               userInfo: nil
@@ -68,9 +82,10 @@
     return @"LocationSelectWindow";
 }
 
--(NSDictionary *) runModalWidthNodes:(NSArray *)nodes forPath:(NSString *)path
+-(NSDictionary *) runModalWithNodeItems:(NSArray *)nodeItems forPath:(NSString *)path
 {
-    _nodePaths = nodes;
+    _nodeItems = nodeItems;
+    
     _path = path;
     [self.window makeKeyAndOrderFront:self];
     
@@ -87,7 +102,7 @@
     
     NSIndexSet *selectedIndexes = [_collectionView selectionIndexes];
     NSInteger *selectedIndex = [selectedIndexes firstIndex];
-    NSString *selectedNode = [_nodePaths objectAtIndex:selectedIndex];
+    NSString *selectedNode = [[_nodeItems objectAtIndex:selectedIndex] nodePath];
     _result = [[NSDictionary alloc] initWithObjectsAndKeys:selectedNode,@"selectedNode", nil];
     
     [self close];

@@ -13,7 +13,7 @@
 @implementation NodeManager
 
 -(id) initWithNodes:(NSArray*)nodes andRedundantPaths:(NSArray*)redundantPaths {
-    lastRootNode = 0;
+    _lastRootNode = 0;
 	_nodes = [nodes retain];
 	_redundantPaths = [redundantPaths retain];
 	return self;
@@ -23,6 +23,10 @@
 	[_nodes release];
 	[_redundantPaths release];
 	[super dealloc];
+}
+
+-(int) lastRootNode {
+    return _lastRootNode;
 }
 
 -(NSArray*) availableRootNodes {
@@ -99,7 +103,7 @@
                 
                 if(!isDir)
                 {
-                    lastRootNode = i;
+                    _lastRootNode = i;
                 }
                 if (includePaths) {
                     [nodePaths addObject:tempPath];
@@ -116,7 +120,7 @@
 	int minPaths = [self isRedundantPath:path] ? 2 : 1;
 	
 	while (createNew && [nodePaths count] < minPaths) {
-        NSLog(@"Last root node is currently %i",lastRootNode);
+        NSLog(@"Last root node is currently %i",_lastRootNode);
         if(sourceNodePaths != nil)
         {
             //TODO: Should we lookup all source nodes?
@@ -130,12 +134,12 @@
                 NSString *rootNode = [_nodes objectAtIndex:i];
                 if([[sourceNodePath substringToIndex:[rootNode length]] isEqualToString:rootNode])
                 {
-                    lastRootNode = i;
+                    _lastRootNode = i;
                     break;
                 }
             }
         }
-        int nodeIndex = lastRootNode; //TODO: Create new files on last queried root location. This is kinda unpredictable
+        int nodeIndex = _lastRootNode; //TODO: Create new files on last queried root location. This is kinda unpredictable
         NSLog(@"Using last root node %i  for %@",nodeIndex,path);
         
 		//int randomNode = random() % [_nodes count];

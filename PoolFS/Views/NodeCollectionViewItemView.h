@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "NodeItem.h"
 
 @interface NodeCollectionViewItemView : NSView
 

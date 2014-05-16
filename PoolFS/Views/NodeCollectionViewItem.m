@@ -24,6 +24,22 @@
     return self;
 }
 
+-(void)setRepresentedObject:(id)representedObject
+{
+    [super setRepresentedObject:representedObject];
+    if([self representedObject] != nil)
+    {
+        NodeItem *nodeItem = (NodeItem*)representedObject;
+        
+        [[self textField] setStringValue:nodeItem.nodePath];
+        [[self latestLabel] setHidden:!nodeItem.latestUsed];
+        
+        double freeGB = (double)nodeItem.freeSpace / 1000.0 / 1000.0 / 1000.0;
+        
+        [[self freeSpaceLabel] setTitle:[NSString stringWithFormat:@"%.02f GB free",freeGB]];
+    }
+}
+
 - (void)setSelected:(BOOL)flag
 {
     [super setSelected:flag];

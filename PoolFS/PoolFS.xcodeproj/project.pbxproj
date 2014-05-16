@@ -14,6 +14,8 @@
 		9819EDE41397CC66000F26D1 /* NSError+POSIX.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819EDE31397CC66000F26D1 /* NSError+POSIX.m */; };
 		9819EDE71397CC77000F26D1 /* NodeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819EDE61397CC77000F26D1 /* NodeManager.m */; };
 		F429ACA7191BA0A100F86BC5 /* PoolFS.icns in Resources */ = {isa = PBXBuildFile; fileRef = F429ACA6191BA0A100F86BC5 /* PoolFS.icns */; };
+		F43B54E21926BBB2007C3EED /* NodeCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = F43B54E11926BBB2007C3EED /* NodeCollectionViewItem.xib */; };
+		F46DFF26192263D7003B1070 /* NodeItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F46DFF25192263D7003B1070 /* NodeItem.m */; };
 		F4A90D23191CFCF50092708A /* LocationSelectWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = F4A90D21191CFCF50092708A /* LocationSelectWindow.m */; };
 		F4A90D24191CFCF50092708A /* LocationSelectWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4A90D22191CFCF50092708A /* LocationSelectWindow.xib */; };
 		F4A90D2B191D22E50092708A /* NodeCollectionViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F4A90D2A191D22E50092708A /* NodeCollectionViewItem.m */; };
@@ -40,6 +42,9 @@
 		9819EDE51397CC77000F26D1 /* NodeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeManager.h; sourceTree = "<group>"; };
 		9819EDE61397CC77000F26D1 /* NodeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NodeManager.m; sourceTree = "<group>"; };
 		F429ACA6191BA0A100F86BC5 /* PoolFS.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = PoolFS.icns; sourceTree = "<group>"; };
+		F43B54E11926BBB2007C3EED /* NodeCollectionViewItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = NodeCollectionViewItem.xib; path = Views/NodeCollectionViewItem.xib; sourceTree = "<group>"; };
+		F46DFF24192263D7003B1070 /* NodeItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NodeItem.h; path = Views/NodeItem.h; sourceTree = "<group>"; };
+		F46DFF25192263D7003B1070 /* NodeItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NodeItem.m; path = Views/NodeItem.m; sourceTree = "<group>"; };
 		F4A90D20191CFCF50092708A /* LocationSelectWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocationSelectWindow.h; path = Views/LocationSelectWindow.h; sourceTree = "<group>"; };
 		F4A90D21191CFCF50092708A /* LocationSelectWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LocationSelectWindow.m; path = Views/LocationSelectWindow.m; sourceTree = "<group>"; };
 		F4A90D22191CFCF50092708A /* LocationSelectWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LocationSelectWindow.xib; path = Views/LocationSelectWindow.xib; sourceTree = "<group>"; };
@@ -167,6 +172,9 @@
 				F4A90D2A191D22E50092708A /* NodeCollectionViewItem.m */,
 				F4A90D2C191D23E10092708A /* NodeCollectionViewItemView.h */,
 				F4A90D2D191D23E10092708A /* NodeCollectionViewItemView.m */,
+				F46DFF24192263D7003B1070 /* NodeItem.h */,
+				F46DFF25192263D7003B1070 /* NodeItem.m */,
+				F43B54E11926BBB2007C3EED /* NodeCollectionViewItem.xib */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -224,6 +232,7 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+				F43B54E21926BBB2007C3EED /* NodeCollectionViewItem.xib in Resources */,
 				F429ACA7191BA0A100F86BC5 /* PoolFS.icns in Resources */,
 				F4A90D24191CFCF50092708A /* LocationSelectWindow.xib in Resources */,
 			);
@@ -242,6 +251,7 @@
 				F4A90D23191CFCF50092708A /* LocationSelectWindow.m in Sources */,
 				FFD925C30EE5082D00A7B2B2 /* PoolFS_Filesystem.m in Sources */,
 				F4C3240C191C5C8200BAD1F8 /* NodeCollectionView.m in Sources */,
+				F46DFF26192263D7003B1070 /* NodeItem.m in Sources */,
 				9819EDE41397CC66000F26D1 /* NSError+POSIX.m in Sources */,
 				9819EDE71397CC77000F26D1 /* NodeManager.m in Sources */,
 				F4A90D2B191D22E50092708A /* NodeCollectionViewItem.m in Sources */,

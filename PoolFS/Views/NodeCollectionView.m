@@ -7,6 +7,8 @@
 //
 
 #import "NodeCollectionView.h"
+#import "NodeCollectionViewItem.h"
+#import "NodeItem.h"
 
 @implementation NodeCollectionView
 
@@ -26,18 +28,9 @@
     // Drawing code here.
 }
 
-- (NSCollectionViewItem *)newItemForRepresentedObject:(id)object
-{
-    NSCollectionViewItem *item =[super newItemForRepresentedObject:object];
-    
-    [item.textField setStringValue:[NSString stringWithFormat:@"%@",object]];
-    
-    return item;
-}
-
 - (void)keyDown:(NSEvent *)theEvent
 {
-    //Pass return key event to window
+    //Pass return and space key event to window
     if([theEvent keyCode] == 36 || [theEvent keyCode] == 49)
     {
         [self.window keyDown:theEvent];

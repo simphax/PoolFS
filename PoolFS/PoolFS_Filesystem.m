@@ -37,6 +37,7 @@
 #import "NSError+POSIX.h"
 #import "NodeManager.h"
 #import "LocationSelectWindow.h"
+#import "NodeItem.h"
 
 @implementation PoolFS_Filesystem
 
@@ -60,8 +61,22 @@
     LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
     
     NSArray *rootNodes = [_manager availableRootNodes];
+    NSMutableArray *nodeItems = [[NSMutableArray alloc] init];
     
-    NSDictionary *returnDict = [locationSelectWindow runModalWidthNodes:rootNodes forPath:path];
+    for(int i=0; i<[rootNodes count]; i++)
+    {
+        NSString *nodePath = [rootNodes objectAtIndex:i];
+        NodeItem *nodeItem = [[NodeItem alloc] init];
+        nodeItem.nodePath = nodePath;
+        nodeItem.latestUsed = [_manager lastRootNode] == i;
+        
+        NSDictionary *info = [[NSFileManager defaultManager] attributesOfFileSystemForPath:nodePath error:nil];
+        
+        nodeItem.freeSpace = [[info valueForKey:@"NSFileSystemFreeSize"] longValue];
+        [nodeItems addObject:nodeItem];
+    }
+    
+    NSDictionary *returnDict = [locationSelectWindow runModalWithNodeItems:nodeItems forPath:path];
     
     if(returnDict != nil)
     {

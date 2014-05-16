@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13C1021" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="LocationSelectWindow">
             <connections>
-                <outlet property="collectionView" destination="pPm-Fk-NkE" id="jpa-AG-jdw"/>
+                <outlet property="collectionView" destination="pPm-Fk-NkE" id="Cwe-3L-AmD"/>
                 <outlet property="infoText" destination="5lo-Bu-X48" id="LCb-KS-EUg"/>
                 <outlet property="submitButton" destination="aGR-yV-isW" id="zau-YE-sxs"/>
                 <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
@@ -35,7 +35,7 @@
                                     <color key="primaryBackgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="secondaryBackgroundColor" name="controlAlternatingRowColor" catalog="System" colorSpace="catalog"/>
                                     <connections>
-                                        <outlet property="itemPrototype" destination="8ks-ap-545" id="PQx-rC-alC"/>
+                                        <outlet property="itemPrototype" destination="8ks-ap-545" id="ZSE-73-NGv"/>
                                     </connections>
                                 </collectionView>
                             </subviews>
@@ -115,38 +115,10 @@ Gw
                 <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
             </connections>
         </window>
-        <collectionViewItem id="8ks-ap-545" customClass="NodeCollectionViewItem">
-            <connections>
-                <outlet property="textField" destination="Asr-08-Rh7" id="ayC-di-29J"/>
-                <outlet property="view" destination="fIm-rS-yCf" id="ICQ-Bj-scq"/>
-            </connections>
-        </collectionViewItem>
-        <view id="fIm-rS-yCf" customClass="NodeCollectionViewItemView">
-            <rect key="frame" x="0.0" y="0.0" width="501" height="55"/>
-            <autoresizingMask key="autoresizingMask"/>
-            <subviews>
-                <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RhY-40-7jQ">
-                    <rect key="frame" x="10" y="10" width="48" height="36"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="PoolFS" id="FEK-Vt-LHN"/>
-                </imageView>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Asr-08-Rh7">
-                    <rect key="frame" x="64" y="19" width="429" height="17"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Tjena" id="3l5-ln-hq7">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-            </subviews>
-        </view>
+        <collectionViewItem nibName="NodeCollectionViewItem" id="8ks-ap-545" customClass="NodeCollectionViewItem"/>
         <view id="m46-AA-Mv1">
             <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
             <autoresizingMask key="autoresizingMask"/>
         </view>
     </objects>
-    <resources>
-        <image name="PoolFS" width="512" height="512"/>
-    </resources>
 </document>

@@ -7,16 +7,17 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "NodeCollectionView.h"
 
 @interface LocationSelectWindow : NSWindowController
 
--(NSDictionary *) runModalWidthNodes:(NSArray *)nodes forPath:(NSString *)path;
+-(NSDictionary *) runModalWithNodeItems:(NSArray *)nodeItems forPath:(NSString *)path;
 
 @property (assign) IBOutlet NSButton *submitButton;
 
-@property (strong, nonatomic) NSArray *nodePaths;
+@property (strong, nonatomic) NSArray *nodeItems;
 
-@property (assign) IBOutlet NSCollectionView *collectionView;
+@property (assign) IBOutlet NodeCollectionView *collectionView;
 
 @property (assign) IBOutlet NSTextField *infoText;
 

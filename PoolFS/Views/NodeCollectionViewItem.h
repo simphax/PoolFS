@@ -7,7 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "NodeItem.h"
 
 @interface NodeCollectionViewItem : NSCollectionViewItem
+
+@property (strong,nonatomic) NodeItem *nodeItem;
+
+@property (assign,atomic) IBOutlet NSButton *latestLabel;
+@property (assign,atomic) IBOutlet NSButton *freeSpaceLabel;
 
 @end

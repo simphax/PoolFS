@@ -10,4 +10,6 @@
 
 @interface NodeCollectionView : NSCollectionView
 
+@property (nonatomic) int *lastRootNode;
+
 @end

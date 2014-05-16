@@ -12,13 +12,14 @@
 @interface NodeManager : NSObject {
 	NSArray * _nodes;
 	NSArray * _redundantPaths;
-    int lastRootNode;
+    int _lastRootNode;
 }
 
 -(id) initWithNodes:(NSArray*)nodes andRedundantPaths:(NSArray*)redundantPaths;
 -(void) dealloc;
 
 -(NSArray*) availableRootNodes;
+-(int) lastRootNode;
 
 -(NSString*) nodeForPath:(NSString*)path error:(NSError **)error;
 
