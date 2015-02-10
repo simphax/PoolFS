@@ -62,50 +62,63 @@
 
 #pragma mark GUI
 
+-(void) runChooseLocationModalForPath:(NSString *) path
+{
+    if(_resetSelectedNodeTimer != nil) {
+        [_resetSelectedNodeTimer invalidate];
+        [_resetSelectedNodeTimer release];
+        _resetSelectedNodeTimer = nil;
+    }
+    
+    if (_selectedNode == nil) {
+        LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
+        
+        NSArray *rootNodes = [_manager availableRootNodes];
+        NSMutableArray *nodeItems = [[NSMutableArray alloc] init];
+        
+        for(int i=0; i<[rootNodes count]; i++)
+        {
+            NSString *nodePath = [rootNodes objectAtIndex:i];
+            NodeItem *nodeItem = [[NodeItem alloc] init];
+            nodeItem.nodePath = nodePath;
+            nodeItem.latestUsed = [_manager lastRootNode] == i;
+            
+            NSDictionary *info = [[NSFileManager defaultManager] attributesOfFileSystemForPath:nodePath error:nil];
+            
+            nodeItem.freeSpace = [[info valueForKey:@"NSFileSystemFreeSize"] longValue];
+            [nodeItems addObject:nodeItem];
+        }
+        
+        NSDictionary *returnDict = [locationSelectWindow runModalWithNodeItems:nodeItems forPath:path];
+        
+        if(returnDict != nil)
+        {
+            _selectedNode = [returnDict objectForKey:@"selectedNode"];
+            
+            NSLog(@"Selected node in modal: %@",_selectedNode);
+        }
+    }
+    
+    _resetSelectedNodeTimer = [[NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(resetSelectedNode:) userInfo:nil repeats:NO] retain];
+    
+    [[NSRunLoop currentRunLoop] addTimer:_resetSelectedNodeTimer forMode:NSDefaultRunLoopMode];
+}
+
 -(NSString *) chooseLocationModalForPath:(NSString *) path
 {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        if(_resetSelectedNodeTimer != nil) {
-            [_resetSelectedNodeTimer invalidate];
-            [_resetSelectedNodeTimer release];
-            _resetSelectedNodeTimer = nil;
-        }
-        
-        if (_selectedNode == nil) {
-            LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
-            
-            NSArray *rootNodes = [_manager availableRootNodes];
-            NSMutableArray *nodeItems = [[NSMutableArray alloc] init];
-            
-            for(int i=0; i<[rootNodes count]; i++)
-            {
-                NSString *nodePath = [rootNodes objectAtIndex:i];
-                NodeItem *nodeItem = [[NodeItem alloc] init];
-                nodeItem.nodePath = nodePath;
-                nodeItem.latestUsed = [_manager lastRootNode] == i;
-                
-                NSDictionary *info = [[NSFileManager defaultManager] attributesOfFileSystemForPath:nodePath error:nil];
-                
-                nodeItem.freeSpace = [[info valueForKey:@"NSFileSystemFreeSize"] longValue];
-                [nodeItems addObject:nodeItem];
-            }
-            
-            NSDictionary *returnDict = [locationSelectWindow runModalWithNodeItems:nodeItems forPath:path];
-            
-            if(returnDict != nil)
-            {
-                _selectedNode = [returnDict objectForKey:@"selectedNode"];
-                
-                NSLog(@"Selected node in modal: %@",_selectedNode);
-            }
-        }
-        
-        _resetSelectedNodeTimer = [[NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(resetSelectedNode:) userInfo:nil repeats:NO] retain];
-        
-        [[NSRunLoop currentRunLoop] addTimer:_resetSelectedNodeTimer forMode:NSDefaultRunLoopMode];
-    });
-    
-    return _selectedNode;
+    if ([NSThread isMainThread])
+    {
+        [self runChooseLocationModalForPath:path];
+    }
+    else
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self runChooseLocationModalForPath:path];
+        });
+    }
+    NSString *result = _selectedNode;
+    _selectedNode = nil;
+    return result;
 }
 
 
@@ -492,7 +505,7 @@
                                    error:(NSError **)error {
 	//TODO: use something else than nsfilemanager to get all extended attributes.
     
-	NSLog(@"attributesOfItemAtPath:%@",path);
+	//NSLog(@"attributesOfItemAtPath:%@",path);
 	NSArray *allNodes = [_manager nodePathsForPath:path error:error];
 	NSString* p = [allNodes objectAtIndex:0];
     //NSLog(@"attributesOfItemAtPath Node path: %@",p);
@@ -579,7 +592,7 @@
 #pragma mark Extended Attributes
 
 - (NSArray *)extendedAttributesOfItemAtPath:(NSString *)path error:(NSError **)error {
-	NSLog(@"extendedAttributesOfItemAtPath:%@",path);
+	//NSLog(@"extendedAttributesOfItemAtPath:%@",path);
 	
 	NSString* p = [[_manager nodePathsForPath:path error:error firstOnly:YES] objectAtIndex:0];
 	
@@ -819,54 +832,86 @@
         
         if([[path substringToIndex:[mountPath length]] isEqualToString:mountPath])
         {
+                
             NSError *errError;
+        
+            NSString *relativePath = [path substringFromIndex:[mountPath length]];
+            NSArray *sourceNodePaths = [_manager nodePathsForPath:relativePath error:&errError firstOnly:NO];
             
-            path = [path substringFromIndex:[mountPath length]];
-            NSArray *sourceNodePaths = [_manager nodePathsForPath:path error:&errError firstOnly:YES];
-            
-            NSString *newNode = [self chooseLocationModalForPath:path];
-            
-            NSString *newPath = [newNode stringByAppendingString:path];
-            NSString *newPathFolder = [newPath substringToIndex:([newPath length] - [[newPath lastPathComponent] length])];
-            
-            
-            NSLog(@"Move %@ to %@",path,newPathFolder);
-           
-            [_manager createDirectoriesForNodePath:newPath error:&errError];
-            if([[NSFileManager defaultManager] fileExistsAtPath:newPath] )
+            if([sourceNodePaths count] != 1)
             {
-                NSAlert *replaceAlert = [NSAlert alertWithMessageText:@"Warning"
-                                defaultButton:@"Cancel"
-                              alternateButton:@"Replace"
-                                  otherButton:nil
-                    informativeTextWithFormat:@"Do you want to replace %@ with %@?",newPath,[sourceNodePaths objectAtIndex:0]];
-                if([replaceAlert runModal] == NSAlertDefaultReturn)
+                NSAlert *replaceAlert = [NSAlert alertWithMessageText:@"Could not move node"
+                                                        defaultButton:@"Ok"
+                                                      alternateButton:nil
+                                                          otherButton:nil
+                                            informativeTextWithFormat:@"Sorry, this action can only be applied to items with no duplicates."];
+                [replaceAlert runModal];
+            }
+            else
+            {
+                NSString *newNode = [self chooseLocationModalForPath: relativePath];
+                
+                if(newNode != nil)
                 {
-                    return;
+                    NSString *newPath = [newNode stringByAppendingString: relativePath];
+                    NSString *newPathFolder = [newPath substringToIndex:([newPath length] - [[newPath lastPathComponent] length])];
+                    
+                    NSDictionary *errDict = nil;
+                    if(![[sourceNodePaths objectAtIndex:0] isEqualToString:newPath])
+                    {
+                        NSLog(@"Move %@ to %@",relativePath,newPathFolder);
+                       
+                        [_manager createDirectoriesForNodePath:newPath error:&errError];
+                        if([[NSFileManager defaultManager] fileExistsAtPath:newPath] )
+                        {
+                            NSAlert *replaceAlert = [NSAlert alertWithMessageText:@"Warning"
+                                            defaultButton:@"Cancel"
+                                          alternateButton:@"Replace"
+                                              otherButton:nil
+                                informativeTextWithFormat:@"Do you want to replace %@ with %@?",newPath,[sourceNodePaths objectAtIndex:0]];
+                            if([replaceAlert runModal] == NSAlertDefaultReturn)
+                            {
+                                return;
+                            }
+                        }
+                        
+                        NSString *appleScript = [NSString stringWithFormat:@"tell application \"Finder\"\n\
+                                                 activate\n\
+                                                 move POSIX file \"%@\" to POSIX file \"%@\" with replacing\n\
+                                                 end tell\n\
+                                                 ",
+                                                 [sourceNodePaths objectAtIndex:0], newPathFolder];
+                        
+                        NSLog(@"Running applescript: %@",appleScript);
+                        NSAppleScript *run = [[NSAppleScript alloc] initWithSource:appleScript];
+                        [run executeAndReturnError:&errDict];
+                    }
+                    
+                    if(errDict == nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath])
+                    {
+                        //Remove the same file from all old sources
+                        for(NSString *sourceNodePath in sourceNodePaths)
+                        {
+                            if(![sourceNodePath isEqualToString:newPath] && [[NSFileManager defaultManager] fileExistsAtPath:sourceNodePath])
+                            {
+                                NSLog(@"Deleting: %@",sourceNodePath);
+                                [[NSFileManager defaultManager] removeItemAtPath:sourceNodePath error:&errError];
+                            }
+                        }
+                    }
                 }
             }
-            
-            NSString *appleScript = [NSString stringWithFormat:@"tell application \"Finder\"\n\
-                                     move POSIX file \"%@\" to POSIX file \"%@\" with replacing\n\
-                                     end tell\n\
-                                     ",
-                                     [sourceNodePaths objectAtIndex:0],newPathFolder ];
-            
-            NSLog(@"Running applescript: %@",appleScript);
-            NSAppleScript *run = [[NSAppleScript alloc] initWithSource:appleScript];
-            NSDictionary *errDict = nil;
-            [run executeAndReturnError:&errDict];
-            
-            //We successfully moved the file but it was not removed from the source. (We copied between drives). Remove the source file
-            if(errDict == nil && [[NSFileManager defaultManager] fileExistsAtPath:[sourceNodePaths objectAtIndex:0]] && [[NSFileManager defaultManager] fileExistsAtPath:newPath] )
-            {
-                [[NSFileManager defaultManager] removeItemAtPath:[sourceNodePaths objectAtIndex:0] error:&errError];
-            }
         }
-        else
-        {
-            
-        }
+        
+        
+        //Always switch focus back to Finder
+        NSString *appleScript = [NSString stringWithFormat:@"tell application \"Finder\"\n\
+                                 activate"];
+        
+        NSLog(@"Running applescript: %@",appleScript);
+        NSAppleScript *run = [[NSAppleScript alloc] initWithSource:appleScript];
+         
+        //NSPerformService(@"Finder/Reveal", pboard);
     }
 }
 
