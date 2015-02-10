@@ -8,6 +8,7 @@
             <connections>
                 <outlet property="collectionView" destination="pPm-Fk-NkE" id="Cwe-3L-AmD"/>
                 <outlet property="infoText" destination="5lo-Bu-X48" id="LCb-KS-EUg"/>
+                <outlet property="rememberCheck" destination="Jy4-zE-gJv" id="94a-m7-77G"/>
                 <outlet property="submitButton" destination="aGR-yV-isW" id="zau-YE-sxs"/>
                 <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
             </connections>
@@ -76,7 +77,7 @@ Gw
                     </button>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="Jy4-zE-gJv">
                         <rect key="frame" x="323" y="22" width="118" height="18"/>
-                        <buttonCell key="cell" type="check" title="Don't ask again" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="3vB-nJ-ZQP">
+                        <buttonCell key="cell" type="check" title="Don't ask again" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="3vB-nJ-ZQP">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>

@@ -21,6 +21,8 @@
 
 @property (assign) IBOutlet NSTextField *infoText;
 
+@property (assign) IBOutlet NSButton *rememberCheck;
+
 - (IBAction)cancel:(id)sender;
 
 @end

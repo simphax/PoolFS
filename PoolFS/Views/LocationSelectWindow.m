@@ -84,8 +84,6 @@
 {
     _nodeItems = nodeItems;
     
-    NSLog(_nodeItems.description);
-    
     _path = path;
     [self.window makeKeyAndOrderFront:self];
     
@@ -103,7 +101,8 @@
     NSIndexSet *selectedIndexes = [_collectionView selectionIndexes];
     NSInteger *selectedIndex = [selectedIndexes firstIndex];
     NSString *selectedNode = [[_nodeItems objectAtIndex:selectedIndex] nodePath];
-    _result = [[NSDictionary alloc] initWithObjectsAndKeys:selectedNode,@"selectedNode", nil];
+    BOOL rememberSelection = [_rememberCheck state] == NSOnState;
+    _result = [[NSDictionary alloc] initWithObjectsAndKeys:selectedNode, @"selectedNode", rememberSelection, @"remember",nil];
     
     [self close];
     [NSApp stopModal];

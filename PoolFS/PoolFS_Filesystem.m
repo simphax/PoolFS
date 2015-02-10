@@ -62,15 +62,16 @@
 
 #pragma mark GUI
 
--(void) runChooseLocationModalForPath:(NSString *) path
+-(NSString *) runChooseLocationModalForPath:(NSString *) path
 {
     if(_resetSelectedNodeTimer != nil) {
         [_resetSelectedNodeTimer invalidate];
         [_resetSelectedNodeTimer release];
         _resetSelectedNodeTimer = nil;
     }
+    NSString *result = _selectedNode;
     
-    if (_selectedNode == nil) {
+    if (result == nil) {
         LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
         
         NSArray *rootNodes = [_manager availableRootNodes];
@@ -93,31 +94,37 @@
         
         if(returnDict != nil)
         {
-            _selectedNode = [returnDict objectForKey:@"selectedNode"];
+            result = [returnDict objectForKey:@"selectedNode"];
             
-            NSLog(@"Selected node in modal: %@",_selectedNode);
+            NSLog(@"Selected node in modal: %@",result);
+            
+            if([returnDict objectForKey:@"remember"])
+            {
+                _selectedNode = result;
+            }
         }
     }
     
     _resetSelectedNodeTimer = [[NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(resetSelectedNode:) userInfo:nil repeats:NO] retain];
     
     [[NSRunLoop currentRunLoop] addTimer:_resetSelectedNodeTimer forMode:NSDefaultRunLoopMode];
+
+    return result;
 }
 
 -(NSString *) chooseLocationModalForPath:(NSString *) path
 {
+    NSString __block *result = nil;
     if ([NSThread isMainThread])
     {
-        [self runChooseLocationModalForPath:path];
+        result = [self runChooseLocationModalForPath:path];
     }
     else
     {
         dispatch_sync(dispatch_get_main_queue(), ^{
-            [self runChooseLocationModalForPath:path];
+            result = [self runChooseLocationModalForPath:path];
         });
     }
-    NSString *result = _selectedNode;
-    _selectedNode = nil;
     return result;
 }
 
