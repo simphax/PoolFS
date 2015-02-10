@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6254" systemVersion="14C109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6254"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NodeCollectionViewItem">
@@ -13,36 +13,44 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <view id="iUc-mI-V5i" customClass="NodeCollectionViewItemView">
             <rect key="frame" x="0.0" y="0.0" width="501" height="55"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
-                <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="79l-if-wEE">
+                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="79l-if-wEE">
                     <rect key="frame" x="10" y="10" width="48" height="36"/>
-                    <autoresizingMask key="autoresizingMask"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="48" id="50j-6K-plo"/>
+                        <constraint firstAttribute="height" constant="36" id="rJ0-dN-S11"/>
+                    </constraints>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="PoolFS" id="zBh-Go-NiR"/>
                 </imageView>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="215-dG-0HP">
-                    <rect key="frame" x="64" y="19" width="429" height="17"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="215-dG-0HP">
+                    <rect key="frame" x="64" y="19" width="257" height="17"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Tjena" id="cQ1-j4-ZeK">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mta-bg-Y9A">
-                    <rect key="frame" x="341" y="15" width="52" height="19"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mta-bg-Y9A">
+                    <rect key="frame" x="321" y="18" width="52" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="18" id="0kG-zM-voX"/>
+                        <constraint firstAttribute="width" constant="52" id="Wlq-iQ-rsL"/>
+                    </constraints>
                     <buttonCell key="cell" type="recessed" title="Latest" bezelStyle="recessed" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Pdp-5u-tLE">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
                         <font key="font" metaFont="systemBold" size="12"/>
                     </buttonCell>
                 </button>
-                <button verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tih-tM-yLo">
-                    <rect key="frame" x="401" y="15" width="80" height="19"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tih-tM-yLo">
+                    <rect key="frame" x="381" y="18" width="100" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="18" id="AKJ-SQ-i3r"/>
+                        <constraint firstAttribute="width" constant="100" id="APe-sM-rmG"/>
+                    </constraints>
                     <buttonCell key="cell" type="recessed" title="20 GB free" bezelStyle="recessed" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="MhW-Ya-3Sj">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
                         <font key="font" metaFont="systemBold" size="12"/>
@@ -50,12 +58,16 @@
                 </button>
             </subviews>
             <constraints>
+                <constraint firstItem="mta-bg-Y9A" firstAttribute="leading" secondItem="215-dG-0HP" secondAttribute="trailing" constant="2" id="7Vd-KC-iIG"/>
+                <constraint firstAttribute="centerY" secondItem="215-dG-0HP" secondAttribute="centerY" id="HMA-pq-doe"/>
+                <constraint firstAttribute="centerY" secondItem="79l-if-wEE" secondAttribute="centerY" id="HO6-UE-him"/>
                 <constraint firstItem="tih-tM-yLo" firstAttribute="leading" secondItem="mta-bg-Y9A" secondAttribute="trailing" constant="8" id="Mv0-gs-CxI"/>
+                <constraint firstAttribute="centerY" secondItem="tih-tM-yLo" secondAttribute="centerY" id="PIE-uL-5Ec"/>
+                <constraint firstItem="215-dG-0HP" firstAttribute="leading" secondItem="79l-if-wEE" secondAttribute="trailing" constant="8" id="WbJ-RW-gxz"/>
                 <constraint firstAttribute="trailing" secondItem="tih-tM-yLo" secondAttribute="trailing" constant="20" id="WzV-gc-Qrb"/>
+                <constraint firstAttribute="centerY" secondItem="mta-bg-Y9A" secondAttribute="centerY" id="afQ-bL-GOu"/>
+                <constraint firstItem="79l-if-wEE" firstAttribute="leading" secondItem="iUc-mI-V5i" secondAttribute="leading" constant="10" id="eFZ-Q2-qp5"/>
             </constraints>
-            <connections>
-                <outlet property="textField" destination="215-dG-0HP" id="BIE-3m-Fee"/>
-            </connections>
         </view>
     </objects>
     <resources>

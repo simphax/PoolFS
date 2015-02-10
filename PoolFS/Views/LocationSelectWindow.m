@@ -39,41 +39,39 @@
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [_collectionView setContent:_nodeItems];
+    [_collectionView setContent:_nodeItems];
 
-        int index = 0;
-        
-        for(int i = 0; i<[_nodeItems count]; i++)
+    int index = 0;
+    
+    for(int i = 0; i<[_nodeItems count]; i++)
+    {
+        NodeItem *item = [_nodeItems objectAtIndex:i];
+        if(item.latestUsed)
         {
-            NodeItem *item = [_nodeItems objectAtIndex:i];
-            if(item.latestUsed)
-            {
-                index = i;
-                break;
-            }
+            index = i;
+            break;
         }
-        
-        //Select the first row
-        [_collectionView setSelectionIndexes:[NSIndexSet indexSetWithIndex:index]];
-        self.infoText.stringValue = [NSString stringWithFormat:@"Choose the node on which to place the file \"%@\"",[_path lastPathComponent]];
+    }
     
+    //Select the first row
+    [_collectionView setSelectionIndexes:[NSIndexSet indexSetWithIndex:index]];
+    self.infoText.stringValue = [NSString stringWithFormat:@"Choose the node on which to place the file \"%@\"",[_path lastPathComponent]];
+
+
+
+    //Timeout in 50 seconds
+    //TODO: Set timeout as a setting? Or get it from somewhere. 60 seconds seems to be the OSXFUSE and Finder timeout.
+
+    [self.window setContentMinSize:NSMakeSize(543, 200)];
+    [self.window setContentMaxSize:NSMakeSize(543, 2000)];
     
-    
-        //Timeout in 50 seconds
-        //TODO: Set timeout as a setting? Or get it from somewhere. 60 seconds seems to be the OSXFUSE and Finder timeout.
-    
-        [self.window setContentMinSize:NSMakeSize(543, 200)];
-        [self.window setContentMaxSize:NSMakeSize(543, 2000)];
-        
-        _timeoutTimer = [NSTimer timerWithTimeInterval: 50.0
-                                                target: self
-                                              selector: @selector(timeout:)
-                                              userInfo: nil
-                                               repeats: NO];
-        [[NSRunLoop currentRunLoop] addTimer: _timeoutTimer
-                                     forMode:NSModalPanelRunLoopMode];
-    });
+    _timeoutTimer = [NSTimer timerWithTimeInterval: 50.0
+                                            target: self
+                                          selector: @selector(timeout:)
+                                          userInfo: nil
+                                           repeats: NO];
+    [[NSRunLoop currentRunLoop] addTimer: _timeoutTimer
+                                 forMode:NSModalPanelRunLoopMode];
 }
 
 
@@ -85,6 +83,8 @@
 -(NSDictionary *) runModalWithNodeItems:(NSArray *)nodeItems forPath:(NSString *)path
 {
     _nodeItems = nodeItems;
+    
+    NSLog(_nodeItems.description);
     
     _path = path;
     [self.window makeKeyAndOrderFront:self];

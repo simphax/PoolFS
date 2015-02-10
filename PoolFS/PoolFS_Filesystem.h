@@ -12,8 +12,12 @@
 
 @interface PoolFS_Filesystem : NSObject  {
 	NodeManager* _manager;
+    NSString* _selectedNode;
 }
 - (id)initWithPoolManager:(NodeManager *)manager;
+- (void)resetSelectedNode:(NSTimer *)timer;
 - (void)dealloc;
+
+@property (nonatomic, retain) NSTimer *resetSelectedNodeTimer;
 
 @end

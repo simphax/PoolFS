@@ -44,9 +44,15 @@
 - (id)initWithPoolManager:(NodeManager *)manager {
 	if ((self = [super init])) {
 		_manager = [manager retain];
+        _selectedNode = nil;
 	}
     
 	return self;
+}
+
+- (void)resetSelectedNode:(NSTimer *)timer {
+    _selectedNode = nil;
+    _resetSelectedNodeTimer = nil;
 }
 
 - (void) dealloc {
@@ -58,37 +64,48 @@
 
 -(NSString *) chooseLocationModalForPath:(NSString *) path
 {
-    LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
-    
-    NSArray *rootNodes = [_manager availableRootNodes];
-    NSMutableArray *nodeItems = [[NSMutableArray alloc] init];
-    
-    for(int i=0; i<[rootNodes count]; i++)
-    {
-        NSString *nodePath = [rootNodes objectAtIndex:i];
-        NodeItem *nodeItem = [[NodeItem alloc] init];
-        nodeItem.nodePath = nodePath;
-        nodeItem.latestUsed = [_manager lastRootNode] == i;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        if(_resetSelectedNodeTimer != nil) {
+            [_resetSelectedNodeTimer invalidate];
+            [_resetSelectedNodeTimer release];
+            _resetSelectedNodeTimer = nil;
+        }
         
-        NSDictionary *info = [[NSFileManager defaultManager] attributesOfFileSystemForPath:nodePath error:nil];
+        if (_selectedNode == nil) {
+            LocationSelectWindow *locationSelectWindow = [[LocationSelectWindow alloc] init];
+            
+            NSArray *rootNodes = [_manager availableRootNodes];
+            NSMutableArray *nodeItems = [[NSMutableArray alloc] init];
+            
+            for(int i=0; i<[rootNodes count]; i++)
+            {
+                NSString *nodePath = [rootNodes objectAtIndex:i];
+                NodeItem *nodeItem = [[NodeItem alloc] init];
+                nodeItem.nodePath = nodePath;
+                nodeItem.latestUsed = [_manager lastRootNode] == i;
+                
+                NSDictionary *info = [[NSFileManager defaultManager] attributesOfFileSystemForPath:nodePath error:nil];
+                
+                nodeItem.freeSpace = [[info valueForKey:@"NSFileSystemFreeSize"] longValue];
+                [nodeItems addObject:nodeItem];
+            }
+            
+            NSDictionary *returnDict = [locationSelectWindow runModalWithNodeItems:nodeItems forPath:path];
+            
+            if(returnDict != nil)
+            {
+                _selectedNode = [returnDict objectForKey:@"selectedNode"];
+                
+                NSLog(@"Selected node in modal: %@",_selectedNode);
+            }
+        }
         
-        nodeItem.freeSpace = [[info valueForKey:@"NSFileSystemFreeSize"] longValue];
-        [nodeItems addObject:nodeItem];
-    }
-    
-    NSDictionary *returnDict = [locationSelectWindow runModalWithNodeItems:nodeItems forPath:path];
-    
-    if(returnDict != nil)
-    {
-        NSString *result = [returnDict objectForKey:@"selectedNode"];
+        _resetSelectedNodeTimer = [[NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(resetSelectedNode:) userInfo:nil repeats:NO] retain];
         
-        NSLog(@"Selected node in modal: %@",result);
-        return result;
-    }
-    else
-    {
-        return nil;
-    }
+        [[NSRunLoop currentRunLoop] addTimer:_resetSelectedNodeTimer forMode:NSDefaultRunLoopMode];
+    });
+    
+    return _selectedNode;
 }
 
 
