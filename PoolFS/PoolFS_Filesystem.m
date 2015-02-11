@@ -709,66 +709,69 @@
     
     NSData *result = data;
     
-    if([allNodes count] > 1)
+    if(![path isEqualToString:@"/"])
     {
-        //Tells finder the last tag was red
-        
-        if([name isEqualToString:@"com.apple.FinderInfo"])
+        if([allNodes count] > 1)
         {
-            if(data == nil)
+            //Tells finder the last tag was red
+            
+            if([name isEqualToString:@"com.apple.FinderInfo"])
             {
-                data = [NSMutableData dataWithLength:32];
+                if(data == nil)
+                {
+                    data = [NSMutableData dataWithLength:32];
+                }
+                if(data != nil)
+                {
+                    //NSLog(@"FinderInfo %@: %@",path,data);
+                    NSRange range = {9, 1};
+                    Byte replace = TAG_COLOR << 1;
+                    
+                    Byte check = 0x00;
+                    [data getBytes:&check range:range];
+                    if(check == 0x00)
+                    {
+                        [data replaceBytesInRange:range withBytes:&replace];
+                    }
+                    
+                    //NSLog(@"ReplacInfo %@: %@",path,data);
+                }
             }
+        }
+        
+        result = data;
+            
+        //Injects a tag called "Duplicate" into the metadata
+        if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
+        {
+            NSMutableArray *unserializedTags;
+            NSPropertyListFormat format;
             if(data != nil)
             {
-                //NSLog(@"FinderInfo %@: %@",path,data);
-                NSRange range = {9, 1};
-                Byte replace = TAG_COLOR << 1;
-                
-                Byte check = 0x00;
-                [data getBytes:&check range:range];
-                if(check == 0x00)
-                {
-                    [data replaceBytesInRange:range withBytes:&replace];
-                }
-                
-                //NSLog(@"ReplacInfo %@: %@",path,data);
+                NSString *error2;
+                unserializedTags = [NSPropertyListSerialization propertyListFromData:data
+                                                                    mutabilityOption:NSPropertyListMutableContainers
+                                                                              format:&format
+                                                                    errorDescription:&error2];
             }
-        }
-    }
-    
-    result = data;
-        
-    //Injects a tag called "Duplicate" into the metadata
-    if([name isEqualToString:@"com.apple.metadata:_kMDItemUserTags"])
-    {
-        NSMutableArray *unserializedTags;
-        NSPropertyListFormat format;
-        if(data != nil)
-        {
-            NSString *error2;
-            unserializedTags = [NSPropertyListSerialization propertyListFromData:data
-                                                                mutabilityOption:NSPropertyListMutableContainers
-                                                                          format:&format
-                                                                errorDescription:&error2];
-        }
-        else
-        {
-            unserializedTags = [[NSMutableArray alloc] init];
-            format = NSPropertyListBinaryFormat_v1_0;
-        }
-        if(unserializedTags != nil)
-        {
-            NSError **error2;
-            
-            [unserializedTags addObject:[NSString stringWithFormat:@"%@Location: %@",@TAG_PREFIX,[allNodes objectAtIndex:0]]];
-            for(int i=1; i < [allNodes count]; i++)
+            else
             {
-                [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n%i",@TAG_PREFIX,[allNodes objectAtIndex:i],TAG_COLOR]];
+                unserializedTags = [[NSMutableArray alloc] init];
+                format = NSPropertyListBinaryFormat_v1_0;
             }
-            //NSLog(@"tags: %@",unserializedTags);
-            
-            result = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:error2];
+            if(unserializedTags != nil)
+            {
+                NSError **error2;
+                
+                [unserializedTags addObject:[NSString stringWithFormat:@"%@Location: %@",@TAG_PREFIX,[allNodes objectAtIndex:0]]];
+                for(int i=1; i < [allNodes count]; i++)
+                {
+                    [unserializedTags addObject:[NSString stringWithFormat:@"%@Duplicate: %@\n%i",@TAG_PREFIX,[allNodes objectAtIndex:i],TAG_COLOR]];
+                }
+                //NSLog(@"tags: %@",unserializedTags);
+                
+                result = [NSPropertyListSerialization dataWithPropertyList:unserializedTags format:format options:0 error:error2];
+            }
         }
     }
 
