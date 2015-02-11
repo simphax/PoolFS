@@ -187,40 +187,63 @@
                  */
                 //[_manager createDirectoriesForNodePath:destNodePath error:error];
     
-                NSString *destNodePath  = nil;
-                if([existingDestNodePaths count] > 0) {
-                    //If the path were moving to exists, replace it
-                    destNodePath = [existingDestNodePaths objectAtIndex:0];
+                NSString *destNodePath = nil;
+                BOOL isDirectory = false;
+                [[NSFileManager defaultManager] fileExistsAtPath:[sourceNodePaths objectAtIndex:0] isDirectory:&isDirectory];
+    
+                if(isDirectory) { //If it's a directory
+                    
+                    //TODO: I assume this will give a list for all destinations in the same count and order as forNodePaths. Am I right?
+                    NSArray* newDestNodePaths = [_manager nodePathsForPath:destination error:error createNew:YES forNodePaths:sourceNodePaths];
+                    
+                    //Loop through all sources and move it inside the same node
+                    for(int i=0; i<[sourceNodePaths count]; i++) {
+                        NSString *sourceNodePath = [sourceNodePaths objectAtIndex:i];
+                        NSString *destNodePath = [newDestNodePaths objectAtIndex:i];
+                        
+                        NSString* p_src = sourceNodePath;
+                        NSString* p_dst = destNodePath;
+                        int ret = rename([p_src UTF8String], [p_dst UTF8String]);
+                        NSLog(@"renaming %@ to %@, status %i",p_src,p_dst,ret);
+                    }
                 } else {
-                    //If the path were moving to does not exist, ask for location
-                    NSString *rootPath = [self chooseLocationModalForPath:destination];
-                    if(rootPath != nil)
-                    {
-                        NSArray* nodePaths = [_manager nodePathsForPath:destination error:error firstOnly:YES createNew:YES forNodePaths:[NSArray arrayWithObject:rootPath] includePaths:YES];
-                        destNodePath = [nodePaths objectAtIndex:0];
+                    if([existingDestNodePaths count] > 0) {
+                        //If the path were moving to exists, replace it
+                        destNodePath = [existingDestNodePaths objectAtIndex:0];
+                    } else {
+                        //If the path were moving to does not exist, ask for location
+                        NSString *rootPath = [self chooseLocationModalForPath:destination];
+                        if(rootPath != nil)
+                        {
+                            NSArray* nodePaths = [_manager nodePathsForPath:destination error:error firstOnly:YES createNew:YES forNodePaths:[NSArray arrayWithObject:rootPath] includePaths:YES];
+                            destNodePath = [nodePaths objectAtIndex:0];
+                        }
                     }
-                }
-                //Lets try to just rename it first.
-                NSString* p_src = [sourceNodePaths objectAtIndex:0];
-                NSString* p_dst = destNodePath;
-                int ret = rename([p_src UTF8String], [p_dst UTF8String]);
-                if ( ret < 0 ) {
-                    //We failed to rename
-                    if ( error ) {
-                        *error = [NSError errorWithPOSIXCode:errno];
-                    }
-                    if(errno == EXDEV) //Cross-device link error. This means the file is at another drive
-                    {
-                        //TODO: This might be dangerous because there is a risk of data loss if it crashes midway. And I guess some metadata may get lost.
-                        [_manager createDirectoriesForNodePath:destNodePath error:error];
-                        NSLog(@"replacing %@ with %@",destNodePath,[sourceNodePaths objectAtIndex:0]);
-                        [[NSFileManager defaultManager] removeItemAtPath:destNodePath error:error];
-                        if(![[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:destNodePath error:error]) return NO;
-                        [[NSFileManager defaultManager] removeItemAtPath:[sourceNodePaths objectAtIndex:0] error:error];
-                    }
-                    else
-                    {
-                        return NO;
+                    
+                    
+                    //Lets try to just rename it first.
+                    
+                    NSString* p_src = [sourceNodePaths objectAtIndex:0];
+                    NSString* p_dst = destNodePath;
+                    int ret = rename([p_src UTF8String], [p_dst UTF8String]);
+                    if ( ret < 0 ) {
+                        //We failed to rename
+                        if ( error ) {
+                            *error = [NSError errorWithPOSIXCode:errno];
+                        }
+                        if(errno == EXDEV) //Cross-device link error. This means the file is at another drive
+                        {
+                            //TODO: This might be dangerous because there is a risk of data loss if it crashes midway. And I guess some metadata may get lost.
+                            [_manager createDirectoriesForNodePath:destNodePath error:error];
+                            NSLog(@"replacing %@ with %@",destNodePath,[sourceNodePaths objectAtIndex:0]);
+                            [[NSFileManager defaultManager] removeItemAtPath:destNodePath error:error];
+                            if(![[NSFileManager defaultManager] copyItemAtPath:[sourceNodePaths objectAtIndex:0] toPath:destNodePath error:error]) return NO;
+                            [[NSFileManager defaultManager] removeItemAtPath:[sourceNodePaths objectAtIndex:0] error:error];
+                        }
+                        else
+                        {
+                            return NO;
+                        }
                     }
                 }
 			//}
@@ -291,6 +314,17 @@
 	return YES; // TODO: handle errors properly
 }
 
+-(BOOL) isHiddenFile:(NSString *)path {
+    BOOL hiddenFile = false;
+    
+    for( NSString *component in [path pathComponents]) {
+        NSLog(@"Checking %@",component);
+        hiddenFile |= [[component substringToIndex:1] isEqualToString:@"."] || ([component length] > 1 && [[component substringToIndex:2] isEqualToString:@"/."]);
+    }
+    
+    return hiddenFile;
+}
+
 //TODO: Will not work with redundant path
 - (BOOL)createFileAtPath:(NSString *)path
               attributes:(NSDictionary *)attributes
@@ -299,18 +333,9 @@
 	
 	NSLog(@"createFileAtPath: %@", path);
     
-    NSString* fileName = [[path lastPathComponent] stringByDeletingPathExtension];
-    
     NSArray* nodePaths = nil;
     
-    BOOL hiddenFile = false;
-    
-    for( NSString *component in [path pathComponents]) {
-        if([[component substringToIndex:1] isEqualToString:@"."] || ([component length] > 1 && [[component substringToIndex:2] isEqualToString:@"/."])) {
-            hiddenFile = true;
-            NSLog(@"This is a hidden file. We will use the last node path for this one.");
-        }
-    }
+    BOOL hiddenFile = [self isHiddenFile:path];
     
     if(!hiddenFile)
     {
@@ -323,6 +348,7 @@
     }
 	else
     {
+        NSLog(@"This is a hidden file. We will use the last node path for this one.");
         nodePaths = [_manager nodePathsForPath:path error:error createNew:YES];
     }
 	

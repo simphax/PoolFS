@@ -117,47 +117,34 @@
         }
     //}
 	
-	int minPaths = [self isRedundantPath:path] ? 2 : 1;
 	
-	while (createNew && [nodePaths count] < minPaths) {
+	if (createNew) {
         NSLog(@"Last root node is currently %i",_lastRootNode);
         if(sourceNodePaths != nil)
         {
             //TODO: Should we lookup all source nodes?
-
+            
             //This will happen when moving a file.
             //We want to move the file at the same physical location
             // so we loop through the root nodes to see which one is the root for the source. Then use that.
-            NSString *sourceNodePath = [sourceNodePaths objectAtIndex:0];
-            for(i = 0; i < [_nodes count]; i++)
-            {
-                NSString *rootNode = [_nodes objectAtIndex:i];
-                if([[sourceNodePath substringToIndex:[rootNode length]] isEqualToString:rootNode])
+            for(NSString *sourceNodePath in sourceNodePaths) {
+                for(i = 0; i < [_nodes count]; i++)
                 {
-                    _lastRootNode = i;
-                    break;
+                    NSString *rootNode = [_nodes objectAtIndex:i];
+                    if([[sourceNodePath substringToIndex:[rootNode length]] isEqualToString:rootNode])
+                    {
+                        _lastRootNode = i;
+                        
+                        [nodePaths addObject:[[[_nodes objectAtIndex:i] stringByAppendingString:path] retain]];
+                        
+                        break;
+                    }
                 }
             }
+        } else {
+            [nodePaths addObject:[[[_nodes objectAtIndex:_lastRootNode] stringByAppendingString:path] retain]];
         }
-        int nodeIndex = _lastRootNode; //TODO: Create new files on last queried root location. This is kinda unpredictable
-        NSLog(@"Using last root node %i  for %@",nodeIndex,path);
         
-		//int randomNode = random() % [_nodes count];
-		//NSLog(@"randomly chose node %d in nodePathsForPath", randomNode);
-		[nodePaths addObject:[[[_nodes objectAtIndex:nodeIndex] stringByAppendingString:path] retain]];
-		
-		// if this is a redundant path, select another (different) random node and add its path
-        if ([self isRedundantPath:path]) {
-			int previousNode = nodeIndex;
-			
-			while (nodeIndex == previousNode) {
-				nodeIndex = random() % [_nodes count];
-			}
-		
-			[nodePaths addObject:[[[_nodes objectAtIndex:nodeIndex] stringByAppendingString:path] retain]];
-			
-		}
-		
 		// finally create any intermediate directories we might need
 		for (id nodePath in nodePaths) {
 			[self createDirectoriesForNodePath:nodePath error:error];
