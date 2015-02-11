@@ -161,8 +161,9 @@
 		}
 	}
 	*/
-	// next we check the number of source nodes == number of dest nodes 
-	NSArray* destNodePaths = [_manager nodePathsForPath:destination error:error createNew:YES forNodePaths:sourceNodePaths];
+    // next we check the number of source nodes == number of dest nodes
+    NSArray* existingDestNodePaths = [_manager nodePathsForPath:destination error:error createNew:NO forNodePaths:sourceNodePaths];
+    //NSArray* newDestNodePaths = [_manager nodePathsForPath:destination error:error createNew:YES forNodePaths:sourceNodePaths];
 
 	//int sourceCount = [sourceNodePaths count];
 	//int destCount = [destNodePaths count];
@@ -185,7 +186,20 @@
 				}
                  */
                 //[_manager createDirectoriesForNodePath:destNodePath error:error];
-                NSString *destNodePath  = [destNodePaths objectAtIndex:0];
+    
+                NSString *destNodePath  = nil;
+                if([existingDestNodePaths count] > 0) {
+                    //If the path were moving to exists, replace it
+                    destNodePath = [existingDestNodePaths objectAtIndex:0];
+                } else {
+                    //If the path were moving to does not exist, ask for location
+                    NSString *rootPath = [self chooseLocationModalForPath:destination];
+                    if(rootPath != nil)
+                    {
+                        NSArray* nodePaths = [_manager nodePathsForPath:destination error:error firstOnly:YES createNew:YES forNodePaths:[NSArray arrayWithObject:rootPath] includePaths:YES];
+                        destNodePath = [nodePaths objectAtIndex:0];
+                    }
+                }
                 //Lets try to just rename it first.
                 NSString* p_src = [sourceNodePaths objectAtIndex:0];
                 NSString* p_dst = destNodePath;
@@ -289,7 +303,16 @@
     
     NSArray* nodePaths = nil;
     
-    if(![[fileName substringToIndex:1] isEqualToString:@"."])
+    BOOL hiddenFile = false;
+    
+    for( NSString *component in [path pathComponents]) {
+        if([[component substringToIndex:1] isEqualToString:@"."] || ([component length] > 1 && [[component substringToIndex:2] isEqualToString:@"/."])) {
+            hiddenFile = true;
+            NSLog(@"This is a hidden file. We will use the last node path for this one.");
+        }
+    }
+    
+    if(!hiddenFile)
     {
         NSString *rootPath = [self chooseLocationModalForPath:path];
         

@@ -18,7 +18,7 @@
         <window title="Choose location" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="alertPanel" appearanceType="aqua" id="F0z-JX-Cv5" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" resizable="YES" nonactivatingPanel="YES"/>
             <rect key="contentRect" x="196" y="240" width="543" height="294"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
             <view key="contentView" id="se5-gp-TjO">
                 <rect key="frame" x="0.0" y="0.0" width="543" height="294"/>
                 <autoresizingMask key="autoresizingMask"/>
